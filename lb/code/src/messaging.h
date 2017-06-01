@@ -29,7 +29,7 @@
 
 #include <limits.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "checks.h"
 #include "debug.h"
 #include "workqueue.h"

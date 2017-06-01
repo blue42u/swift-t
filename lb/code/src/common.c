@@ -33,7 +33,7 @@
 
 #include "common.h"
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "checks.h"
 
 char xlb_xfer[ADLB_XFER_SIZE];
@@ -88,7 +88,7 @@ adlb_code xlb_env_placement(adlb_placement *placement)
   return ADLB_string_to_placement(s, placement);
 }
 
-adlb_code ADLB_string_to_placement(const char *string,
+adlb_code ADLBX_string_to_placement(const char *string,
                            adlb_placement *placement)
 {
   const size_t MAX_PLACEMENT_LEN = 64;

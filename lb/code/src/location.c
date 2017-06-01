@@ -16,7 +16,7 @@
 #include <table_ip.h>
 #include <tools.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "checks.h"
 #include "common.h"
 #include "debug.h"
@@ -270,7 +270,7 @@ xlb_setup_leaders(xlb_layout *layout, struct xlb_hostmap *hosts,
 }
 
 adlb_code
-ADLB_Hostmap_stats(unsigned int* count, unsigned int* name_max)
+ADLBX_Hostmap_stats(unsigned int* count, unsigned int* name_max)
 {
   ADLB_CHECK_MSG(xlb_s.hostmap_mode != HOSTMAP_DISABLED,
             "ADLB_Hostmap_stats: hostmap is disabled!");
@@ -281,7 +281,7 @@ ADLB_Hostmap_stats(unsigned int* count, unsigned int* name_max)
 }
 
 adlb_code
-ADLB_Hostmap_lookup(const char* name, int max,
+ADLBX_Hostmap_lookup(const char* name, int max,
                     int* output, int* actual)
 {
   ADLB_CHECK_MSG(xlb_s.hostmap_mode != HOSTMAP_DISABLED,
@@ -302,7 +302,7 @@ ADLB_Hostmap_lookup(const char* name, int max,
 }
 
 adlb_code
-ADLB_Hostmap_list(char* output, unsigned int max,
+ADLBX_Hostmap_list(char* output, unsigned int max,
                   unsigned int offset, int* actual)
 {
   ADLB_CHECK_MSG(xlb_s.hostmap_mode != HOSTMAP_DISABLED,

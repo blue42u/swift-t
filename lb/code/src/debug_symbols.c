@@ -17,7 +17,7 @@
 #include "debug_symbols.h"
 
 #include "adlb-defs.h"
-#include "adlb.h"
+#include "adlb-p.h"
 
 #include "checks.h"
 #include "debug.h"

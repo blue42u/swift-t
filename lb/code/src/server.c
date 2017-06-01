@@ -30,7 +30,7 @@
 #include <exm-memory.h>
 #include <tools.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "adlb-mpe.h"
 #include "backoffs.h"
 #include "checks.h"
@@ -208,7 +208,7 @@ static inline adlb_code check_steal(void);
 static inline void print_final_stats();
 
 adlb_code
-ADLB_Server(long max_memory)
+ADLBX_Server(long max_memory)
 {
   TRACE_START;
 

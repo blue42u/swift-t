@@ -19,7 +19,7 @@
    ADLB Profiling Interface
  */
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "common.h"
 #include "data.h"
 
@@ -54,7 +54,7 @@ static char user_state_description[256];
 static void setup_mpe_events(int num_types, int* types);
 
 adlb_code
-ADLB_Init(int num_servers, int num_types, int* types,
+ADLBX_Init(int num_servers, int num_types, int* types,
           int* am_server, MPI_Comm comm, MPI_Comm* worker_comm)
 {
   // In XLB, the types must be in simple order
@@ -105,7 +105,7 @@ setup_mpe_events(int num_types, int* types)
 
 
 adlb_code
-ADLB_Put(const void *work_buf, int work_len, int reserve_rank,
+ADLBX_Put(const void *work_buf, int work_len, int reserve_rank,
          int answer_rank, int work_type, adlb_put_opts opts)
 {
   MPE_LOG(xlb_mpe_wkr_put_start);
@@ -118,7 +118,7 @@ ADLB_Put(const void *work_buf, int work_len, int reserve_rank,
   return rc;
 }
 
-adlb_code ADLB_Dput(const void* payload, int length, int target,
+adlb_code ADLBX_Dput(const void* payload, int length, int target,
         int answer, int type, adlb_put_opts opts, const char *name,
         const adlb_datum_id *wait_ids, int wait_id_count, 
         const adlb_datum_id_sub *wait_id_subs, int wait_id_sub_count)
@@ -165,7 +165,7 @@ mpe_log_user_state(int type)
 #endif
 
 adlb_code
-ADLB_Get(int type_requested, void** payload, int* length, int max_length,
+ADLBX_Get(int type_requested, void** payload, int* length, int max_length,
          int* answer, int* type_recvd, MPI_Comm* comm)
 {
 #ifdef ENABLE_MPE
@@ -187,7 +187,7 @@ ADLB_Get(int type_requested, void** payload, int* length, int max_length,
 }
 
 adlb_code
-ADLB_Iget(int type_requested, void* payload, int* length,
+ADLBX_Iget(int type_requested, void* payload, int* length,
          int* answer, int* type_recvd, MPI_Comm* comm)
 {
   MPE_LOG(xlb_mpe_wkr_iget_start);
@@ -198,7 +198,7 @@ ADLB_Iget(int type_requested, void* payload, int* length,
 }
 
 adlb_code
-ADLB_Aget(int type_requested, adlb_payload_buf payload, adlb_get_req *req)
+ADLBX_Aget(int type_requested, adlb_payload_buf payload, adlb_get_req *req)
 {
   MPE_LOG(xlb_mpe_wkr_aget_start);
   adlb_code rc = ADLBP_Aget(type_requested, payload, req);
@@ -207,7 +207,7 @@ ADLB_Aget(int type_requested, adlb_payload_buf payload, adlb_get_req *req)
 }
 
 adlb_code
-ADLB_Amget(int type_requested, int nreqs, bool wait,
+ADLBX_Amget(int type_requested, int nreqs, bool wait,
           const adlb_payload_buf* payloads, adlb_get_req *reqs)
 {
   MPE_LOG(xlb_mpe_wkr_amget_start);
@@ -216,7 +216,7 @@ ADLB_Amget(int type_requested, int nreqs, bool wait,
   return rc;
 }
 
-adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
+adlb_code ADLBX_Aget_test(adlb_get_req *req, int* length,
                     int* answer, int* type_recvd, MPI_Comm* comm)
 {
   MPE_LOG(xlb_mpe_wkr_aget_test_start);
@@ -225,7 +225,7 @@ adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
   return rc;
 }
 
-adlb_code ADLB_Aget_wait(adlb_get_req *req, int* length,
+adlb_code ADLBX_Aget_wait(adlb_get_req *req, int* length,
                     int* answer, int* type_recvd, MPI_Comm* comm)
 {
   MPE_LOG(xlb_mpe_wkr_aget_wait_start);
@@ -238,7 +238,7 @@ adlb_code ADLB_Aget_wait(adlb_get_req *req, int* length,
    Applications should use the ADLB_Create_type functions in adlb.h
  */
 adlb_code
-ADLB_Create(adlb_datum_id id, adlb_data_type type,
+ADLBX_Create(adlb_datum_id id, adlb_data_type type,
             adlb_type_extra type_extra,
             adlb_create_props props,
             adlb_datum_id *new_id)
@@ -249,7 +249,7 @@ ADLB_Create(adlb_datum_id id, adlb_data_type type,
   return rc;
 }
 
-adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count)
+adlb_code ADLBX_Multicreate(ADLB_create_spec *specs, int count)
 {
 //   MPE_LOG(xlb_mpe_wkr_multicreate_start);
   adlb_code rc = ADLBP_Multicreate(specs, count);
@@ -257,19 +257,19 @@ adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count)
   return rc;
 }
 
-adlb_code ADLB_Add_dsym(adlb_dsym symbol,
+adlb_code ADLBX_Add_dsym(adlb_dsym symbol,
                                 adlb_dsym_data data)
 {
   return ADLBP_Add_dsym(symbol, data);
 }
 
-adlb_dsym_data ADLB_Dsym(adlb_dsym symbol)
+adlb_dsym_data ADLBX_Dsym(adlb_dsym symbol)
 {
   return ADLBP_Dsym(symbol);
 }
 
 adlb_code
-ADLB_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
+ADLBX_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
             adlb_refc decr)
 {
   MPE_LOG(xlb_mpe_wkr_exists_start);
@@ -278,7 +278,7 @@ ADLB_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
   return rc;
 }
 
-adlb_code ADLB_Refcount_get(adlb_datum_id id, adlb_refc *result,
+adlb_code ADLBX_Refcount_get(adlb_datum_id id, adlb_refc *result,
                               adlb_refc decr)
 {
   MPE_LOG(xlb_mpe_wkr_get_refcounts_start);
@@ -288,7 +288,7 @@ adlb_code ADLB_Refcount_get(adlb_datum_id id, adlb_refc *result,
 }
 
 adlb_code
-ADLB_Store(adlb_datum_id id, adlb_subscript subscript,
+ADLBX_Store(adlb_datum_id id, adlb_subscript subscript,
           adlb_data_type type, const void *data, size_t length,
           adlb_refc refcount_decr, adlb_refc store_refcounts)
 {
@@ -300,7 +300,7 @@ ADLB_Store(adlb_datum_id id, adlb_subscript subscript,
 }
 
 adlb_code
-ADLB_Retrieve(adlb_datum_id id, adlb_subscript subscript,
+ADLBX_Retrieve(adlb_datum_id id, adlb_subscript subscript,
       adlb_retrieve_refc refcounts, adlb_data_type* type,
       void *data, size_t *length)
 {
@@ -311,7 +311,7 @@ ADLB_Retrieve(adlb_datum_id id, adlb_subscript subscript,
 }
 
 adlb_code
-ADLB_Enumerate(adlb_datum_id container_id,
+ADLBX_Enumerate(adlb_datum_id container_id,
                int count, int offset, adlb_refc decr,
                bool include_keys, bool include_vals,
                void** data, size_t* length, int* records,
@@ -323,18 +323,18 @@ ADLB_Enumerate(adlb_datum_id container_id,
 }
 
 adlb_code
-ADLB_Read_refcount_enable(void)
+ADLBX_Read_refcount_enable(void)
 {
   return ADLBP_Read_refcount_enable();
 }
 
 adlb_code
-ADLB_Refcount_incr(adlb_datum_id id, adlb_refc change)
+ADLBX_Refcount_incr(adlb_datum_id id, adlb_refc change)
 {
   return ADLBP_Refcount_incr(id, change);
 }
 
-adlb_code ADLB_Insert_atomic(adlb_datum_id id, adlb_subscript subscript,
+adlb_code ADLBX_Insert_atomic(adlb_datum_id id, adlb_subscript subscript,
                        adlb_retrieve_refc refcounts,
                        bool *result, bool *value_present,
                        void *data, size_t *length, adlb_data_type *type)
@@ -344,29 +344,29 @@ adlb_code ADLB_Insert_atomic(adlb_datum_id id, adlb_subscript subscript,
   return rc;
 }
 
-adlb_code ADLB_Unique(adlb_datum_id *result)
+adlb_code ADLBX_Unique(adlb_datum_id *result)
 {
   return ADLBP_Unique(result);
 }
 
-adlb_code ADLB_Alloc_global(int count, adlb_datum_id *start)
+adlb_code ADLBX_Alloc_global(int count, adlb_datum_id *start)
 {
   return ADLBP_Alloc_global(count, start);
 }
 
-adlb_code ADLB_Typeof(adlb_datum_id id, adlb_data_type* type)
+adlb_code ADLBX_Typeof(adlb_datum_id id, adlb_data_type* type)
 {
   return ADLBP_Typeof(id, type);
 }
 
-adlb_code ADLB_Container_typeof(adlb_datum_id id, adlb_data_type* key_type,
+adlb_code ADLBX_Container_typeof(adlb_datum_id id, adlb_data_type* key_type,
                                 adlb_data_type* val_type)
 {
   return ADLBP_Container_typeof(id, key_type, val_type);
 }
 
 adlb_code
-ADLB_Subscribe(adlb_datum_id id, adlb_subscript subscript,
+ADLBX_Subscribe(adlb_datum_id id, adlb_subscript subscript,
                int work_type, int* subscribed)
 {
   MPE_LOG(xlb_mpe_wkr_subscribe_start);
@@ -375,7 +375,7 @@ ADLB_Subscribe(adlb_datum_id id, adlb_subscript subscript,
   return rc;
 }
 
-adlb_code ADLB_Container_reference(adlb_datum_id id, adlb_subscript subscript,
+adlb_code ADLBX_Container_reference(adlb_datum_id id, adlb_subscript subscript,
                adlb_datum_id ref_id, adlb_subscript ref_subscript,
                adlb_data_type ref_type, adlb_refc transfer_refs,
                int ref_write_decr)
@@ -384,7 +384,7 @@ adlb_code ADLB_Container_reference(adlb_datum_id id, adlb_subscript subscript,
             ref_subscript, ref_type, transfer_refs, ref_write_decr);
 }
 
-adlb_code ADLB_Container_size(adlb_datum_id id, int* size,
+adlb_code ADLBX_Container_size(adlb_datum_id id, int* size,
                               adlb_refc decr)
 {
   adlb_code rc;
@@ -393,19 +393,19 @@ adlb_code ADLB_Container_size(adlb_datum_id id, int* size,
 }
 
 adlb_code
-ADLB_Lock(adlb_datum_id id, bool* result)
+ADLBX_Lock(adlb_datum_id id, bool* result)
 {
   return ADLBP_Lock(id, result);
 }
 
 adlb_code
-ADLB_Unlock(adlb_datum_id id)
+ADLBX_Unlock(adlb_datum_id id)
 {
   return ADLBP_Unlock(id);
 }
 
 adlb_code
-ADLB_Finalize()
+ADLBX_Finalize()
 {
   MPE_LOG(xlb_mpe_all_finalize_start);
   adlb_code rc = ADLBP_Finalize();

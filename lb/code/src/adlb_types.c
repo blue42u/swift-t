@@ -10,7 +10,7 @@
 #include <table.h>
 #include <vint.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "checks.h"
 #include "data_cleanup.h"
 #include "data_internal.h"
@@ -140,7 +140,7 @@ xlb_data_types_finalize(void)
    plus additional info
  */
 adlb_code
-ADLB_Data_string_totype(const char* type_string, adlb_data_type* type,
+ADLBX_Data_string_totype(const char* type_string, adlb_data_type* type,
                         adlb_type_extra *extra)
 {
   adlb_data_code dc;
@@ -156,7 +156,7 @@ ADLB_Data_string_totype(const char* type_string, adlb_data_type* type,
    Convert given data type number to output string representation
  */
 const char
-*ADLB_Data_type_tostring(adlb_data_type type)
+*ADLBX_Data_type_tostring(adlb_data_type type)
 {
   switch(type)
   {

@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "checks.h"
 #include "common.h"
 #include "data.h"

@@ -30,7 +30,7 @@
 #include <table_lp.h>
 #include <vint.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "adlb_types.h"
 #include "data.h"
 #include "data_cleanup.h"

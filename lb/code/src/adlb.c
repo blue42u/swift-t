@@ -31,7 +31,7 @@
 #include <list_i.h>
 #include <tools.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "adlb_types.h"
 #include "adlb-version.h"
 #include "adlb-xpt.h"
@@ -279,20 +279,20 @@ static adlb_code xlb_setup_layout(MPI_Comm comm, int nservers)
 
 
 adlb_code
-ADLB_Version(version* output)
+ADLBX_Version(version* output)
 {
   version_parse(output, ADLB_VERSION);
   return ADLB_SUCCESS;
 }
 
 MPI_Comm
-ADLB_GetComm_workers()
+ADLBX_GetComm_workers()
 {
   return xlb_s.worker_comm;
 }
 
 MPI_Comm
-ADLB_GetComm_leaders()
+ADLBX_GetComm_leaders()
 {
   return xlb_s.leader_comm;
 }
@@ -1079,7 +1079,7 @@ static adlb_code xlb_block_worker(bool blocking)
 }
 
 int
-ADLB_Locate(adlb_datum_id id)
+ADLBX_Locate(adlb_datum_id id)
 {
   int offset = abs((int) (id % xlb_s.layout.servers));
   int rank = xlb_s.layout.size - xlb_s.layout.servers + offset;
@@ -1238,7 +1238,7 @@ adlb_code ADLBP_Multicreate(ADLB_create_spec *specs, int count)
 }
 
 adlb_code
-ADLB_Create_integer(adlb_datum_id id, adlb_create_props props,
+ADLBX_Create_integer(adlb_datum_id id, adlb_create_props props,
                   adlb_datum_id *new_id)
 {
   return ADLBP_Create_impl(id, ADLB_DATA_TYPE_INTEGER,
@@ -1246,7 +1246,7 @@ ADLB_Create_integer(adlb_datum_id id, adlb_create_props props,
 }
 
 adlb_code
-ADLB_Create_float(adlb_datum_id id, adlb_create_props props,
+ADLBX_Create_float(adlb_datum_id id, adlb_create_props props,
                   adlb_datum_id *new_id)
 {
   return ADLBP_Create_impl(id, ADLB_DATA_TYPE_FLOAT,
@@ -1254,7 +1254,7 @@ ADLB_Create_float(adlb_datum_id id, adlb_create_props props,
 }
 
 adlb_code
-ADLB_Create_string(adlb_datum_id id, adlb_create_props props,
+ADLBX_Create_string(adlb_datum_id id, adlb_create_props props,
                   adlb_datum_id *new_id)
 {
   return ADLBP_Create_impl(id, ADLB_DATA_TYPE_STRING,
@@ -1262,21 +1262,21 @@ ADLB_Create_string(adlb_datum_id id, adlb_create_props props,
 }
 
 adlb_code
-ADLB_Create_blob(adlb_datum_id id, adlb_create_props props,
+ADLBX_Create_blob(adlb_datum_id id, adlb_create_props props,
                   adlb_datum_id *new_id)
 {
   return ADLBP_Create_impl(id, ADLB_DATA_TYPE_BLOB, ADLB_TYPE_EXTRA_NULL,
                    props, new_id);
 }
 
-adlb_code ADLB_Create_ref(adlb_datum_id id, adlb_create_props props,
+adlb_code ADLBX_Create_ref(adlb_datum_id id, adlb_create_props props,
                               adlb_datum_id *new_id)
 {
   return ADLBP_Create_impl(id, ADLB_DATA_TYPE_REF, ADLB_TYPE_EXTRA_NULL,
                    props, new_id);
 }
 
-adlb_code ADLB_Create_struct(adlb_datum_id id, adlb_create_props props,
+adlb_code ADLBX_Create_struct(adlb_datum_id id, adlb_create_props props,
                    adlb_struct_type struct_type, adlb_datum_id *new_id)
 {
   adlb_type_extra extra;
@@ -1287,7 +1287,7 @@ adlb_code ADLB_Create_struct(adlb_datum_id id, adlb_create_props props,
 }
 
 adlb_code
-ADLB_Create_container(adlb_datum_id id, adlb_data_type key_type,
+ADLBX_Create_container(adlb_datum_id id, adlb_data_type key_type,
                       adlb_data_type val_type,
                       adlb_create_props props, adlb_datum_id *new_id)
 {
@@ -1299,7 +1299,7 @@ ADLB_Create_container(adlb_datum_id id, adlb_data_type key_type,
                            props, new_id);
 }
 
-adlb_code ADLB_Create_multiset(adlb_datum_id id,
+adlb_code ADLBX_Create_multiset(adlb_datum_id id,
                                 adlb_data_type val_type,
                                 adlb_create_props props,
                                 adlb_datum_id *new_id)
@@ -2068,7 +2068,7 @@ ADLBP_Unlock(adlb_datum_id id)
         Filled in if idle with # of tasks for each type
  */
 adlb_code
-ADLB_Server_idle(int rank, int64_t check_attempt, bool* result,
+ADLBX_Server_idle(int rank, int64_t check_attempt, bool* result,
                  int *request_counts, int *untargeted_work_counts)
 {
   MPI_Request request;
@@ -2173,7 +2173,7 @@ ADLBP_Finalize()
 }
 
 adlb_code
-ADLB_Fail(int code)
+ADLBX_Fail(int code)
 {
   printf("ADLB_Fail(%i)\n", code);
 
@@ -2186,7 +2186,7 @@ ADLB_Fail(int code)
 }
 
 void
-ADLB_Abort(int code)
+ADLBX_Abort(int code)
 {
   printf("ADLB: ADLB_Abort(%i) calling MPI_Abort(%i)\n", code, code);
   MPI_Abort(MPI_COMM_WORLD, code);

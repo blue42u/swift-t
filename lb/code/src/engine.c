@@ -35,7 +35,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <adlb.h>
+#include <adlb-p.h>
 
 #include <c-utils.h>
 #include <list.h>

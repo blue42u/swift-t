@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "adlb.h"
+#include "adlb-p.h"
 #include "client_internal.h"
 #include "common.h"
 #include "data_cleanup.h"

@@ -1,50 +1,50 @@
-/*
- * Copyright 2013 University of Chicago and Argonne National Laboratory
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License
- */
-
-
-#ifndef ADLB_H
-#define ADLB_H
-
-#include "adlb-defs.h"
-#include "version.h"
-
-#define XLB
-#define XLB_VERSION 0
+#include "adlb-x.h"
+#include <stdio.h>
 
 /*
    These are the functions available to ADLB application code
  */
-
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
                     int *am_server, MPI_Comm adlb_comm,
-                    MPI_Comm *worker_comm);
+                    MPI_Comm *worker_comm) {
+	adlb_code r = ADLBX_Init(nservers, ntypes, type_vect, am_server, adlb_comm, worker_comm);
+	printf("Init %x %x\n", adlb_comm, *worker_comm);
+	return r;
+}
 
-adlb_code ADLB_Server(long max_memory);
+adlb_code ADLB_Server(long max_memory) {
+	printf("Server\n");
+	return ADLBX_Server(max_memory);
+}
 
-adlb_code ADLB_Version(version* output);
+adlb_code ADLB_Version(version* output) {
+	printf("Version\n");
+	return ADLBX_Version(output);
+}
 
-MPI_Comm ADLB_GetComm_workers(void);
+MPI_Comm ADLB_GetComm_workers(void) {
+	MPI_Comm c = ADLBX_GetComm_workers();
+	printf("GetComm_workers %x\n", c);
+	return c;
+}
 
-MPI_Comm ADLB_GetComm_leaders(void);
+MPI_Comm ADLB_GetComm_leaders(void) {
+	MPI_Comm c = ADLBX_GetComm_leaders();
+	printf("GetComm_leaders %x\n", c);
+	return c;
+}
 
 adlb_code ADLB_Hostmap_stats(unsigned int* count,
-                             unsigned int* name_max);
+                             unsigned int* name_max) {
+	printf("Hostmap_stats\n");
+	return ADLBX_Hostmap_stats(count, name_max);
+}
 
 adlb_code ADLB_Hostmap_lookup(const char* name, int count,
-                              int* output, int* actual);
+                              int* output, int* actual) {
+	printf("Hostmap_lookup\n");
+	return ADLBX_Hostmap_lookup(name, count, output, actual);
+}
 
 /**
    Obtain RS-separated buffer of host names
@@ -54,7 +54,10 @@ adlb_code ADLB_Hostmap_lookup(const char* name, int count,
    @param actual: out number of hostnames written
  */
 adlb_code ADLB_Hostmap_list(char* output, unsigned int max,
-                            unsigned int offset, int* actual);
+                            unsigned int offset, int* actual) {
+	printf("Hostmap_list\n");
+	return ADLBX_Hostmap_list(output, max, offset, actual);
+}
 
 /*
   Put a task into the global task queue.
@@ -70,7 +73,10 @@ adlb_code ADLB_Hostmap_list(char* output, unsigned int max,
   @param opts: additional options
  */
 adlb_code ADLB_Put(const void* payload, int length, int target, int answer,
-                   int type, adlb_put_opts opts);
+                   int type, adlb_put_opts opts) {
+	printf("Put\n");
+	return ADLBX_Put(payload, length, target, answer, type, opts);
+}
 
 /*
   Put a data-dependent task into the global task queue.  The task will
@@ -85,7 +91,10 @@ adlb_code ADLB_Put(const void* payload, int length, int target, int answer,
 adlb_code ADLB_Dput(const void* payload, int length, int target,
         int answer, int type, adlb_put_opts opts, const char *name,
         const adlb_datum_id *wait_ids, int wait_id_count, 
-        const adlb_datum_id_sub *wait_id_subs, int wait_id_sub_count);
+        const adlb_datum_id_sub *wait_id_subs, int wait_id_sub_count) {
+	printf("Dput\n");
+	return ADLBX_Dput(payload, length, target, answer, type, opts, name, wait_ids, wait_id_count, wait_id_subs, wait_id_sub_count);
+}
 
 /*
   Get a task from the global task queue.
@@ -104,7 +113,13 @@ adlb_code ADLB_Dput(const void* payload, int length, int target,
  */
 adlb_code ADLB_Get(int type_requested, void** payload,
                    int* length, int max_length,
-                   int* answer, int* type_recvd, MPI_Comm* comm);
+                   int* answer, int* type_recvd, MPI_Comm* comm) {
+	MPI_Comm tmp;
+	if(comm == NULL) comm = &tmp;
+	adlb_code r = ADLBX_Get(type_requested, payload, length, max_length, answer, type_recvd, comm);
+	printf("Get %x\n", *comm);
+	return r;
+}
 
 /*
  Polling equivalent of ADLB_Get.  Returns ADLB_NOTHING if no
@@ -114,7 +129,11 @@ adlb_code ADLB_Get(int type_requested, void** payload,
   NOTE: Iget does not currently support parallel tasks
 */
 adlb_code ADLB_Iget(int type_requested, void* payload, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd, MPI_Comm* comm) {
+	adlb_code r = ADLBX_Iget(type_requested, payload, length, answer, type_recvd, comm);
+	printf("Iget %x\n", *comm);
+	return r;
+}
 /*
   Non-blocking equivalent of ADLB_Get.  Matching requests should be
   filled in in the order that they are posted (i.e. if work matches two
@@ -130,7 +149,10 @@ adlb_code ADLB_Iget(int type_requested, void* payload, int* length,
   req: handle used to check for completion, filled in by function
  */
 adlb_code ADLB_Aget(int type_requested, adlb_payload_buf payload,
-                     adlb_get_req *req);
+                     adlb_get_req *req) {
+	printf("Aget\n");
+	return ADLBX_Aget(type_requested, payload, req);
+}
 
 /*
   Same as ADLB_Aget except initiates multiple requests at once.
@@ -145,7 +167,10 @@ adlb_code ADLB_Aget(int type_requested, adlb_payload_buf payload,
  */
 adlb_code ADLB_Amget(int type_requested, int nreqs, bool wait,
                      const adlb_payload_buf* payloads,
-                     adlb_get_req *reqs);
+                     adlb_get_req *reqs) {
+	printf("Amget\n");
+	return ADLBX_Amget(type_requested, nreqs, wait, payloads, reqs);
+}
 
 /*
   Test if a get request completed without blocking.
@@ -153,65 +178,105 @@ adlb_code ADLB_Amget(int type_requested, int nreqs, bool wait,
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd, MPI_Comm* comm) {
+	printf("Aget_test\n");
+	return ADLBX_Aget_test(req, length, answer, type_recvd, comm);
+}
 
 /*
   Wait until a get request completes.
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_wait(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd, MPI_Comm* comm) {
+	adlb_code r = ADLBX_Aget_wait(req, length, answer, type_recvd, comm);
+	printf("Aget_wait %x\n", *comm);
+	return r;
+}
 
 /**
    Obtain server rank responsible for data id
  */
-int ADLB_Locate(adlb_datum_id id);
+int ADLB_Locate(adlb_datum_id id) {
+	printf("Locate\n");
+	return ADLBX_Locate(id);
+}
 
 // Applications should not call these directly but
 // should use the typed forms defined below
 // Can be called locally on server where data resides
 adlb_code ADLB_Create(adlb_datum_id id, adlb_data_type type,
                       adlb_type_extra type_extra,
-                      adlb_create_props props, adlb_datum_id *new_id);
+                      adlb_create_props props, adlb_datum_id *new_id) {
+	printf("Create\n");
+	return ADLBX_Create(id, type, type_extra, props, new_id);
+}
 
 // Create multiple variables.
 // Currently we assume that spec[i].id is ADLB_DATA_ID_NULL and
 // will be filled in with a new id
 // Can be called locally on server where data resides
-adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count);
+adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count) {
+	printf("Multicreate\n");
+	return ADLBX_Multicreate(specs, count);
+}
 
 
 adlb_code ADLB_Create_integer(adlb_datum_id id, adlb_create_props props,
-                              adlb_datum_id *new_id);
+                              adlb_datum_id *new_id) {
+	printf("Create_integer\n");
+	return ADLBX_Create_integer(id, props, new_id);
+}
 
 adlb_code ADLB_Create_float(adlb_datum_id id, adlb_create_props props,
-                              adlb_datum_id *new_id);
+                              adlb_datum_id *new_id) {
+	printf("Create_float\n");
+	return ADLBX_Create_float(id, props, new_id);
+}
 
 adlb_code ADLB_Create_string(adlb_datum_id id, adlb_create_props props,
-                              adlb_datum_id *new_id);
+                              adlb_datum_id *new_id) {
+	printf("Create_string\n");
+	return ADLBX_Create_string(id, props, new_id);
+}
 
 adlb_code ADLB_Create_blob(adlb_datum_id id, adlb_create_props props,
-                              adlb_datum_id *new_id);
+                              adlb_datum_id *new_id) {
+	printf("Create_blob\n");
+	return ADLBX_Create_blob(id, props, new_id);
+}
 
 adlb_code ADLB_Create_ref(adlb_datum_id id, adlb_create_props props,
-                              adlb_datum_id *new_id);
+                              adlb_datum_id *new_id) {
+	printf("Create_ref\n");
+	return ADLBX_Create_ref(id, props, new_id);
+}
 /**
  * Struct type: specify struct type, or leave as ADLB_STRUCT_TYPE_NULL to
  *              resolve upon assigning typed struct value
  */
 adlb_code ADLB_Create_struct(adlb_datum_id id, adlb_create_props props,
-                             adlb_struct_type struct_type, adlb_datum_id *new_id);
+                             adlb_struct_type struct_type, adlb_datum_id *new_id) {
+	printf("Create_struct\n");
+	return ADLBX_Create_struct(id, props, struct_type, new_id);
+}
 
 adlb_code ADLB_Create_container(adlb_datum_id id,
                                 adlb_data_type key_type, 
                                 adlb_data_type val_type, 
                                 adlb_create_props props,
-                                adlb_datum_id *new_id);
+                                adlb_datum_id *new_id) {
+	printf("Create_container\n");
+	return ADLBX_Create_container(id, key_type, val_type, props, new_id);
+}
 
 adlb_code ADLB_Create_multiset(adlb_datum_id id,
                                 adlb_data_type val_type, 
                                 adlb_create_props props,
-                                adlb_datum_id *new_id);
+                                adlb_datum_id *new_id) {
+	printf("Create_multiset\n");
+	return ADLBX_Create_multiset(id, val_type, props, new_id);
+}
 /*
   Add debug symbol entry, overwriting any existing entry.
   Only adds to local table (not on other ranks).
@@ -219,7 +284,10 @@ adlb_code ADLB_Create_multiset(adlb_datum_id id,
   symbol: debug symbol identifier, should not be ADLB_DSYM_NULL
   data: associated null-terminated data string, will be copied.
  */
-adlb_code ADLB_Add_dsym(adlb_dsym symbol, adlb_dsym_data data);
+adlb_code ADLB_Add_dsym(adlb_dsym symbol, adlb_dsym_data data) {
+	printf("Add_dsym\n");
+	return ADLBX_Add_dsym(symbol, data);
+}
 
 /*
   Retrieve debug symbol entry from local debug symbol table.
@@ -227,10 +295,16 @@ adlb_code ADLB_Add_dsym(adlb_dsym symbol, adlb_dsym_data data);
   symbol: a debug symbol identifier
   return: entry previous added for symbol, or NULL values if not present
  */
-adlb_dsym_data ADLB_Dsym(adlb_dsym symbol);
+adlb_dsym_data ADLB_Dsym(adlb_dsym symbol) {
+	printf("Dsym\n");
+	return ADLBX_Dsym(symbol);
+}
 
 adlb_code ADLB_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
-                       adlb_refc decr);
+                       adlb_refc decr) {
+	printf("Exists\n");
+	return ADLBX_Exists(id, subscript, result, decr);
+}
 
 /**
  * Find out the current reference counts for a datum.
@@ -242,7 +316,10 @@ adlb_code ADLB_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
  * decr: amount to decrement refcounts
  */
 adlb_code ADLB_Refcount_get(adlb_datum_id id, adlb_refc *result,
-                              adlb_refc decr);
+                              adlb_refc decr) {
+	printf("Refcount_get\n");
+	return ADLBX_Refcount_get(id, result, decr);
+}
 
 /*
   Store value into datum
@@ -257,7 +334,10 @@ adlb_code ADLB_Refcount_get(adlb_datum_id id, adlb_refc *result,
  */
 adlb_code ADLB_Store(adlb_datum_id id, adlb_subscript subscript,
           adlb_data_type type, const void *data, size_t length,
-          adlb_refc refcount_decr, adlb_refc store_refcounts);
+          adlb_refc refcount_decr, adlb_refc store_refcounts) {
+	printf("Store\n");
+	return ADLBX_Store(id, subscript, type, data, length, refcount_decr, store_refcounts);
+}
 
 /*
    Retrieve contents of datum.
@@ -272,7 +352,10 @@ adlb_code ADLB_Store(adlb_datum_id id, adlb_subscript subscript,
  */
 adlb_code ADLB_Retrieve(adlb_datum_id id, adlb_subscript subscript,
       adlb_retrieve_refc refcounts, adlb_data_type* type,
-      void* data, size_t* length);
+      void* data, size_t* length) {
+	printf("Retrieve\n");
+	return ADLBX_Retrieve(id, subscript, refcounts, type, data, length);
+}
 
 /*
    List contents of container
@@ -290,12 +373,21 @@ adlb_code ADLB_Enumerate(adlb_datum_id container_id,
                    int count, int offset, adlb_refc decr,
                    bool include_keys, bool include_vals,
                    void** data, size_t* length, int* records,
-                   adlb_type_extra *kv_type);
+                   adlb_type_extra *kv_type) {
+	printf("Enumerate\n");
+	return ADLBX_Enumerate(container_id, count, offset, decr, include_keys, include_vals, data, length, records, kv_type);
+}
 
 // Switch on read refcounting and memory management, which is off by default
-adlb_code ADLB_Read_refcount_enable(void);
+adlb_code ADLB_Read_refcount_enable(void) {
+	printf("Read_refcount_enable\n");
+	return ADLBX_Read_refcount_enable();
+}
 
-adlb_code ADLB_Refcount_incr(adlb_datum_id id, adlb_refc change);
+adlb_code ADLB_Refcount_incr(adlb_datum_id id, adlb_refc change) {
+	printf("Refcount_incr\n");
+	return ADLBX_Refcount_incr(id, change);
+}
 
 /*
   Try to reserve an insert position in container
@@ -313,24 +405,36 @@ adlb_code ADLB_Refcount_incr(adlb_datum_id id, adlb_refc change);
 adlb_code ADLB_Insert_atomic(adlb_datum_id id, adlb_subscript subscript,
                         adlb_retrieve_refc refcounts,
                         bool *result, bool *value_present,
-                        void *data, size_t *length, adlb_data_type *type);
+                        void *data, size_t *length, adlb_data_type *type) {
+	printf("Insert_atomic\n");
+	return ADLBX_Insert_atomic(id, subscript, refcounts, result, value_present, data, length, type);
+}
 
 /*
   returns: ADLB_SUCCESS if datum found
        ADLB_NOTHING if datum not found (can indicate it was gced)
  */
 adlb_code ADLB_Subscribe(adlb_datum_id id, adlb_subscript subscript,
-                          int work_type, int* subscribed);
+                          int work_type, int* subscribed) {
+	printf("Subscribe\n");
+	return ADLBX_Subscribe(id, subscript, work_type, subscribed);
+}
 
 adlb_code ADLB_Container_reference(adlb_datum_id id, adlb_subscript subscript,
                 adlb_datum_id ref_id, adlb_subscript ref_subscript,
                 adlb_data_type ref_type, adlb_refc transfer_refs,
-                int ref_write_decr);
+                int ref_write_decr) {
+	printf("Container_reference\n");
+	return ADLBX_Container_reference(id, subscript, ref_id, ref_subscript, ref_type, transfer_refs, ref_write_decr);
+}
 
 /*
  * Allocate a unique data ID
  */
-adlb_code ADLB_Unique(adlb_datum_id *result);
+adlb_code ADLB_Unique(adlb_datum_id *result) {
+	printf("Unique\n");
+	return ADLBX_Unique(result);
+}
 
 /*
  * Allocates a range of count data IDs ADLB ranks.  This is useful for
@@ -348,47 +452,83 @@ adlb_code ADLB_Unique(adlb_datum_id *result);
  * or a ADLB_Create or related call.  If the allocated range conflicts
  * with any IDs already created, this will return an error.
  */
-adlb_code ADLB_Alloc_global(int count, adlb_datum_id *start);
+adlb_code ADLB_Alloc_global(int count, adlb_datum_id *start) {
+	printf("Alloc_global\n");
+	return ADLBX_Alloc_global(count, start);
+}
 
-adlb_code ADLB_Typeof(adlb_datum_id id, adlb_data_type* type);
+adlb_code ADLB_Typeof(adlb_datum_id id, adlb_data_type* type) {
+	printf("Typeof\n");
+	return ADLBX_Typeof(id, type);
+}
 
 adlb_code ADLB_Container_typeof(adlb_datum_id id, adlb_data_type* key_type,
-                                 adlb_data_type* val_type);
+                                 adlb_data_type* val_type) {
+	printf("Container_typeof\n");
+	return ADLBX_Container_typeof(id, key_type, val_type);
+}
 
 adlb_code ADLB_Container_size(adlb_datum_id container_id, int* size,
-                              adlb_refc decr);
+                              adlb_refc decr) {
+	printf("Container_size\n");
+	return ADLBX_Container_size(container_id, size, decr);
+}
 
-adlb_code ADLB_Lock(adlb_datum_id id, bool* result);
+adlb_code ADLB_Lock(adlb_datum_id id, bool* result) {
+	printf("Lock\n");
+	return ADLBX_Lock(id, result);
+}
 
-adlb_code ADLB_Unlock(adlb_datum_id id);
+adlb_code ADLB_Unlock(adlb_datum_id id) {
+	printf("Unlock\n");
+	return ADLBX_Unlock(id);
+}
 
 /**
   Get information about a type based on name.
   Returns error if not found
  */
 adlb_code ADLB_Data_string_totype(const char* type_string,
-              adlb_data_type* type, adlb_type_extra *extra);
+              adlb_data_type* type, adlb_type_extra *extra) {
+	printf("Data_string_totype\n");
+	return ADLBX_Data_string_totype(type_string, type, extra);
+}
 
-const char *ADLB_Data_type_tostring(adlb_data_type type);
+const char *ADLB_Data_type_tostring(adlb_data_type type) {
+	printf("Data_type_tostring\n");
+	return ADLBX_Data_type_tostring(type);
+}
 
 /*
   Convert string to placement enum value.
   Case insensitive.
  */
 adlb_code ADLB_string_to_placement(const char *string,
-                           adlb_placement *placement);
+                           adlb_placement *placement) {
+	printf("string_to_placement\n");
+	return ADLBX_string_to_placement(string, placement);
+}
 
 adlb_code ADLB_Server_idle(int rank, int64_t check_attempt, bool* result,
-                 int *request_counts, int *untargeted_work_counts);
+                 int *request_counts, int *untargeted_work_counts) {
+	printf("Server_idle\n");
+	return ADLBX_Server_idle(rank, check_attempt, result, request_counts, untargeted_work_counts);
+}
 
-adlb_code ADLB_Finalize(void);
+adlb_code ADLB_Finalize(void) {
+	printf("Finalize\n");
+	return ADLBX_Finalize();
+}
 
 /**
    Tell server to fail.
  */
-adlb_code ADLB_Fail(int code);
+adlb_code ADLB_Fail(int code) {
+	printf("Fail\n");
+	return ADLBX_Fail(code);
+}
 
-void ADLB_Abort(int code);
-
-#endif
-
+void ADLB_Abort(int code) {
+	printf("Abort\n");
+	ADLBX_Abort(code);
+}
