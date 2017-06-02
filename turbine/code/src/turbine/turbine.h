@@ -44,14 +44,6 @@ typedef struct {
   turbine_subscript subscript;
 } td_sub_pair;
 
-/**
-   If the user parallel task is being released, this
-
-   if (rc will be set to the communicator to use.
-   If task is not parallel, this is MPI_COMM_SELF
-*/
-extern MPI_Comm turbine_task_comm;
-
 turbine_code turbine_init(int amserver, int rank, int size);
 
 void turbine_version(version* output);

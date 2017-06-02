@@ -1047,9 +1047,8 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
 #endif
 
 #ifdef USE_XLB
-  MPI_Comm task_comm;
   int rc = ADLB_Get(req_type, &payload, &work_len, work_len,
-                    &answer_rank, &work_type, &task_comm);
+                    &answer_rank, &work_type);
   if (rc == ADLB_ERROR) TCL_RETURN_ERROR("Error getting work!");
   if (rc == ADLB_SHUTDOWN)
   {
@@ -1063,7 +1062,6 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
     Tcl_SetObjResult(interp, Tcl_NewStringObj(payload, work_len - 1));
     free(payload);
   }
-  turbine_task_comm = task_comm;
 #endif
 
   // Store answer_rank in caller's stack frame
@@ -1099,9 +1097,8 @@ ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
   int work_len;
   int answer_rank;
 
-  MPI_Comm task_comm;
   adlb_code rc = ADLB_Iget(req_type, result, &work_len,
-                           &answer_rank, &work_type, &task_comm);
+                           &answer_rank, &work_type);
   if (rc == ADLB_SHUTDOWN)
   {
     strcpy(result, "ADLB_SHUTDOWN");
@@ -1114,8 +1111,6 @@ ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
   }
 
   DEBUG_ADLB("adlb::iget: %s", result);
-
-  turbine_task_comm = task_comm;
 
   // Store answer_rank in caller's stack frame
   Tcl_Obj* tcl_answer_rank = Tcl_NewIntObj(answer_rank);

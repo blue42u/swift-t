@@ -854,16 +854,6 @@ worker_keyword_args(Tcl_Interp *interp, Tcl_Obj *const objv[],
   return TCL_OK;
 }
 
-int
-Turbine_TaskComm_Cmd(ClientData cdata, Tcl_Interp *interp,
-                     int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(1);
-  Tcl_Obj* result = Tcl_NewLongObj(turbine_task_comm);
-  Tcl_SetObjResult(interp, result);
-  return TCL_OK;
-}
-
 static int
 Turbine_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[])
@@ -1780,7 +1770,6 @@ Tclturbine_Init(Tcl_Interp* interp)
   COMMAND("cache_check", Turbine_Cache_Check_Cmd);
   COMMAND("cache_retrieve", Turbine_Cache_Retrieve_Cmd);
   COMMAND("cache_store", Turbine_Cache_Store_Cmd);
-  COMMAND("task_comm",   Turbine_TaskComm_Cmd);
   COMMAND("finalize",    Turbine_Finalize_Cmd);
   COMMAND("debug_on",    Turbine_Debug_On_Cmd);
   COMMAND("debug",       Turbine_Debug_Cmd);

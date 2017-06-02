@@ -106,12 +106,10 @@ adlb_code ADLB_Dput(const void* payload, int length, int target,
   @param answer OUT parameter for answer rank specified in ADLB_Put
                     for task
   @param type_recvd OUT parameter for actual type of task
-  @param comm   OUT parameter for MPI communicator to use for
-                executing parallel task
  */
 adlb_code ADLB_Get(int type_requested, void** payload,
                    int* length, int max_length,
-                   int* answer, int* type_recvd, MPI_Comm* comm);
+                   int* answer, int* type_recvd);
 
 /*
  Polling equivalent of ADLB_Get.  Returns ADLB_NOTHING if no
@@ -121,7 +119,7 @@ adlb_code ADLB_Get(int type_requested, void** payload,
   NOTE: Iget does not currently support parallel tasks
 */
 adlb_code ADLB_Iget(int type_requested, void* payload, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd);
 /*
   Non-blocking equivalent of ADLB_Get.  Matching requests should be
   filled in in the order that they are posted (i.e. if work matches two
@@ -160,14 +158,14 @@ adlb_code ADLB_Amget(int type_requested, int nreqs, bool wait,
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd);
 
 /*
   Wait until a get request completes.
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_wait(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm);
+                    int* answer, int* type_recvd);
 
 /**
    Obtain server rank responsible for data id

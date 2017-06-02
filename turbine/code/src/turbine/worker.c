@@ -57,10 +57,9 @@ turbine_worker_loop(Tcl_Interp* interp,
     void* payload = buffer;
     int task_size = buffer_size;
 
-    MPI_Comm task_comm;
     int answer_rank, type_recved;
     adlb_code code = ADLB_Get(work_type, &payload, &task_size, MAX_TASK,
-                              &answer_rank, &type_recved, &task_comm);
+                              &answer_rank, &type_recved);
     if (code == ADLB_SHUTDOWN)
       break;
     if (code != ADLB_SUCCESS)
@@ -69,9 +68,6 @@ turbine_worker_loop(Tcl_Interp* interp,
       return TURBINE_ERROR_ADLB;
     }
     assert(type_recved == work_type);
-
-    // Set task communicator for parallel tasks
-    turbine_task_comm = task_comm;
 
     char* command = payload;
     DEBUG_TURBINE("eval: %s", command);

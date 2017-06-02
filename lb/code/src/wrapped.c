@@ -160,14 +160,13 @@ adlb_code ADLB_Dput(const void* payload, int length, int target,
  */
 adlb_code ADLB_Get(int type_requested, void** payload,
                    int* length, int max_length,
-                   int* answer, int* type_recvd, MPI_Comm* comm) {
-	MPI_Comm tmp;
-	if(comm == NULL) comm = &tmp;
-	adlb_code r = ADLBX_Get(type_requested, payload, length, max_length, answer, type_recvd, comm);
+                   int* answer, int* type_recvd) {
 #if DEBUG
-	printf("Get %x\n", *comm);
+	printf("Get\n");
 #endif
-	return r;
+	MPI_Comm tmp;
+	return ADLBX_Get(type_requested, payload, length, max_length,
+		answer, type_recvd, &tmp);
 }
 
 /*
@@ -178,12 +177,13 @@ adlb_code ADLB_Get(int type_requested, void** payload,
   NOTE: Iget does not currently support parallel tasks
 */
 adlb_code ADLB_Iget(int type_requested, void* payload, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm) {
-	adlb_code r = ADLBX_Iget(type_requested, payload, length, answer, type_recvd, comm);
+                    int* answer, int* type_recvd) {
 #if DEBUG
-	printf("Iget %x\n", *comm);
+	printf("Iget\n");
 #endif
-	return r;
+	MPI_Comm tmp;
+	return ADLBX_Iget(type_requested, payload, length, answer,
+		type_recvd, &tmp);
 }
 /*
   Non-blocking equivalent of ADLB_Get.  Matching requests should be
@@ -233,11 +233,12 @@ adlb_code ADLB_Amget(int type_requested, int nreqs, bool wait,
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm) {
+                    int* answer, int* type_recvd) {
 #if DEBUG
 	printf("Aget_test\n");
 #endif
-	return ADLBX_Aget_test(req, length, answer, type_recvd, comm);
+	MPI_Comm tmp;
+	return ADLBX_Aget_test(req, length, answer, type_recvd, &tmp);
 }
 
 /*
@@ -245,12 +246,12 @@ adlb_code ADLB_Aget_test(adlb_get_req *req, int* length,
   Return codes match ADLB_Get
  */
 adlb_code ADLB_Aget_wait(adlb_get_req *req, int* length,
-                    int* answer, int* type_recvd, MPI_Comm* comm) {
-	adlb_code r = ADLBX_Aget_wait(req, length, answer, type_recvd, comm);
+                    int* answer, int* type_recvd) {
 #if DEBUG
-	printf("Aget_wait %x\n", *comm);
+	printf("Aget_wait\n");
 #endif
-	return r;
+	MPI_Comm tmp;
+	return ADLBX_Aget_wait(req, length, answer, type_recvd, &tmp);
 }
 
 /**

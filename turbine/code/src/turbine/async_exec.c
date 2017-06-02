@@ -405,14 +405,12 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
   DEBUG_EXECUTOR("reqs->tail=%i reqs->head=%i", reqs->tail, reqs->head);
   while (reqs->nreqs > 0)
   {
-    MPI_Comm tmp_comm;
     adlb_get_req *req = &reqs->requests[reqs->tail];
     DEBUG_EXECUTOR("Check request %i", reqs->tail);
     int work_len, answer_rank, type_recved;
     if (poll)
     {
-      ac = ADLB_Aget_test(req, &work_len, &answer_rank, &type_recved,
-                          &tmp_comm);
+      ac = ADLB_Aget_test(req, &work_len, &answer_rank, &type_recved);
       EXEC_ADLB_CHECK_MSG(ac, TURBINE_EXEC_OTHER,
                           "Error getting work from ADLB");
 
@@ -431,8 +429,7 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
     }
     else
     {
-      ac = ADLB_Aget_wait(req, &work_len, &answer_rank, &type_recved,
-                          &tmp_comm);
+      ac = ADLB_Aget_wait(req, &work_len, &answer_rank, &type_recved);
       if (ac == ADLB_SHUTDOWN)
       {
         DEBUG_EXECUTOR("Async executor loop for %s got shutdown signal",

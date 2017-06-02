@@ -55,7 +55,6 @@
 
 #include "src/tcl/adlb/tcl-adlb.h"
 
-MPI_Comm turbine_task_comm   = MPI_COMM_NULL;
 MPI_Comm turbine_leader_comm = MPI_COMM_NULL;
 
 /**
