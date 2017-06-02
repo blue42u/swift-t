@@ -106,9 +106,6 @@ static int am_server;
 static int am_debug_server;
 #endif
 
-/** Communicator for ADLB workers */
-static MPI_Comm adlb_worker_comm = MPI_COMM_NULL;
-
 /** Rank in adlb_comm */
 static int adlb_worker_comm_rank = -1;
 
@@ -172,8 +169,7 @@ typedef struct {
   adlb_type_extra *extras; /* E.g. for struct subtype */
 } compound_type;
 
-static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[],
-                           MPI_Comm *comm);
+static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[]);
 static void set_namespace_constants(Tcl_Interp* interp);
 
 static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
@@ -340,7 +336,7 @@ ADLB_Acquire_Ref_Impl(ClientData cdata, Tcl_Interp *interp,
           adlb_subscript_kind sub_kind);
 
 /**
-   usage: adlb::init_comm [<comm>]?
+   usage: adlb::init_comm
 
    Setup ADLB communicator and MPI if needed, but no other parts of ADLB.
 
@@ -353,19 +349,10 @@ static int
 ADLB_Init_Comm_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(objc == 1 || objc == 2, "requires 0 or 1 arguments!");
+  TCL_CONDITION(objc == 1, "requires 0 arguments!");
   int rc;
 
-  MPI_Comm *adlb_comm_ptr = NULL;
-  if (objc == 2)
-  {
-    long tmp_ptr = 0;
-    rc = Tcl_GetLongFromObj(interp, objv[1], &tmp_ptr);
-    TCL_CHECK(rc);
-    adlb_comm_ptr = (MPI_Comm*)tmp_ptr;
-  }
-
-  rc = adlb_setup_comm(interp, objv, adlb_comm_ptr);
+  rc = adlb_setup_comm(interp, objv);
   TCL_CHECK(rc);
 
   return TCL_OK;
@@ -373,41 +360,24 @@ ADLB_Init_Comm_Cmd(ClientData cdata, Tcl_Interp *interp,
 
 /*
  * Setup the ADLB communicator
- *
- * comm: if NULL, use MPI_COMM_WORLD
  */
-static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[],
-                           MPI_Comm *comm)
+static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(!adlb_comm_init, "ADLB Communicator already initialized");
-  int rc;
 
-  if (comm == NULL)
-  {
-    // Start with MPI_Init() and MPI_COMM_WORLD
-    int argc = 0;
-    char** argv = NULL;
-    must_comm_free = true;
-    rc = MPI_Init(&argc, &argv);
-    assert(rc == MPI_SUCCESS);
-    MPI_Comm_dup(MPI_COMM_WORLD, &adlb_comm);
-  }
-  else
-  {
-    adlb_comm = *comm;
-  }
-
-  MPI_Comm_size(adlb_comm, &adlb_comm_size);
-  MPI_Comm_rank(adlb_comm, &adlb_comm_rank);
+  adlb_comm = ADLB_Init_comm();
 
   adlb_comm_init = true;
+
+  adlb_comm_size = ADLB_Get_size();
+  adlb_comm_rank = ADLB_Get_rank();
 
   return TCL_OK;
 }
 
 
 /**
-   usage: adlb::init <servers> <types> [<comm>]?
+   usage: adlb::init <servers> <types>
    Simplified use of ADLB_Init type_vect: just give adlb_init
    a number ntypes, and the valid types will be: [0..ntypes-1]
 
@@ -418,7 +388,7 @@ static int
 ADLB_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(objc == 3 || objc == 4, "requires 2 or 3 arguments!");
+  TCL_CONDITION(objc == 3, "requires 2 arguments!");
   TCL_CONDITION(!adlb_init, "ADLB already initialized");
 
   mm_init();
@@ -444,18 +414,9 @@ ADLB_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
   rc = field_name_objs_init(interp, objv);
   TCL_CHECK(rc);
 
-  MPI_Comm *adlb_comm_ptr = NULL;
-  if (objc == 4)
-  {
-    long tmp_comm_ptr = 0;
-    rc = Tcl_GetLongFromObj(interp, objv[3], &tmp_comm_ptr);
-    TCL_CHECK(rc);
-    adlb_comm_ptr = (MPI_Comm *) tmp_comm_ptr;
-  }
-
   if (!adlb_comm_init)
   {
-    rc = adlb_setup_comm(interp, objv, adlb_comm_ptr);
+    rc = adlb_setup_comm(interp, objv);
     TCL_CHECK(rc);
   }
 
@@ -467,22 +428,14 @@ ADLB_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
     // Other configuration information will go here...
   }
 
-  // ADLB_Init(int num_servers, int use_debug_server,
-  //           int aprintf_flag, int num_types, int *types,
-  //           int *am_server, int *am_debug_server, MPI_Comm *app_comm)
-#ifdef USE_ADLB
-  rc = ADLB_Init(servers, 0, 0, ntypes, type_vect,
-               &am_server, &am_debug_server, &adlb_worker_comm);
-#endif
-#ifdef USE_XLB
   rc = ADLB_Init(servers, ntypes, type_vect,
-                 &am_server, adlb_comm, &adlb_worker_comm);
-#endif
+                 &am_server);
+
   if (rc != ADLB_SUCCESS)
     return TCL_ERROR;
 
   if (! am_server)
-    MPI_Comm_rank(adlb_worker_comm, &adlb_worker_comm_rank);
+    adlb_worker_comm_rank = ADLB_GetRank_workers();
 
   // Set static variables
   adlb_workers = workers;

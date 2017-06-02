@@ -3,13 +3,25 @@
 
 #define DEBUG 0
 
+static MPI_Comm comm;
+static MPI_Comm work_comm;
+
 /*
    These are the functions available to ADLB application code
  */
+MPI_Comm ADLB_Init_comm() {
+	int argc = 0;
+	char** argv = NULL;
+	MPI_Init(&argc, &argv);
+	//assert(rc == MPI_SUCCESS);	// Just hope it works...
+	MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+	return comm;
+}
+
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
-                    int *am_server, MPI_Comm adlb_comm,
-                    MPI_Comm *worker_comm) {
-	adlb_code r = ADLBX_Init(nservers, ntypes, type_vect, am_server, adlb_comm, worker_comm);
+                    int *am_server) {
+	adlb_code r = ADLBX_Init(nservers, ntypes, type_vect,
+		am_server, comm, &work_comm);
 #if DEBUG
 	printf("Init %x %x\n", adlb_comm, *worker_comm);
 #endif
@@ -28,6 +40,24 @@ adlb_code ADLB_Version(version* output) {
 	printf("Version\n");
 #endif
 	return ADLBX_Version(output);
+}
+
+int ADLB_Get_rank() {
+	int out;
+	MPI_Comm_rank(comm, &out);
+	return out;
+}
+
+int ADLB_Get_size() {
+	int out;
+	MPI_Comm_size(comm, &out);
+	return out;
+}
+
+int ADLB_GetRank_workers() {
+	int out;
+	MPI_Comm_rank(work_comm, &out);
+	return out;
 }
 
 MPI_Comm ADLB_GetComm_workers(void) {

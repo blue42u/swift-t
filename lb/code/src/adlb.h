@@ -28,13 +28,20 @@
    These are the functions available to ADLB application code
  */
 
+MPI_Comm ADLB_Init_comm();
+
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
-                    int *am_server, MPI_Comm adlb_comm,
-                    MPI_Comm *worker_comm);
+                    int *am_server);
 
 adlb_code ADLB_Server(long max_memory);
 
 adlb_code ADLB_Version(version* output);
+
+int ADLB_Get_rank();
+
+int ADLB_Get_size();
+
+int ADLB_GetRank_workers();
 
 MPI_Comm ADLB_GetComm_workers(void);
 

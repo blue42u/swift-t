@@ -85,11 +85,7 @@ namespace eval turbine {
         c::init_debug
 
         # Setup communicator so we can get size later
-        if { [ info exists ::TURBINE_ADLB_COMM ] } {
-            adlb::init_comm $::TURBINE_ADLB_COMM
-        } else {
-            adlb::init_comm
-        }
+        adlb::init_comm
 
         # Ensure all executors are known to system before setting up ranks
         register_all_executors
