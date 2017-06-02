@@ -673,10 +673,7 @@ ADLB_Worker_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
   TCL_ARGS(1);
-  int rc;
-
-  rc = MPI_Barrier(ADLB_GetComm_workers());
-  ASSERT(rc == MPI_SUCCESS);
+  ASSERT(ADLB_Barrier_worker() == ADLB_SUCCESS);
   return TCL_OK;
 }
 

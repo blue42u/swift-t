@@ -43,9 +43,7 @@ int ADLB_Get_size();
 
 int ADLB_GetRank_workers();
 
-MPI_Comm ADLB_GetComm_workers(void);
-
-MPI_Comm ADLB_GetComm_leaders(void);
+adlb_code ADLB_Barrier_worker();
 
 int ADLB_Is_leader();
 

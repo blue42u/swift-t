@@ -59,20 +59,9 @@ int ADLB_GetRank_workers() {
 	return out;
 }
 
-MPI_Comm ADLB_GetComm_workers(void) {
-	MPI_Comm c = ADLBX_GetComm_workers();
-#if DEBUG
-	printf("GetComm_workers %x\n", c);
-#endif
-	return c;
-}
-
-MPI_Comm ADLB_GetComm_leaders(void) {
-	MPI_Comm c = ADLBX_GetComm_leaders();
-#if DEBUG
-	printf("GetComm_leaders %x\n", c);
-#endif
-	return c;
+adlb_code ADLB_Barrier_worker() {
+	return (MPI_Barrier(ADLBX_GetComm_workers()) == MPI_SUCCESS)
+		? ADLB_SUCCESS : ADLB_ERROR;
 }
 
 int ADLB_Is_leader() {
