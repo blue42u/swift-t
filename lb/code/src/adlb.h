@@ -45,22 +45,6 @@ int ADLB_GetRank_workers();
 
 int ADLB_Is_leader();
 
-adlb_code ADLB_Hostmap_stats(unsigned int* count,
-                             unsigned int* name_max);
-
-adlb_code ADLB_Hostmap_lookup(const char* name, int count,
-                              int* output, int* actual);
-
-/**
-   Obtain RS-separated buffer of host names
-   @param output: OUT Buffer into which to write result
-   @param max: Maximal number of characters to write
-   @param offset: start with this hostname
-   @param actual: out number of hostnames written
- */
-adlb_code ADLB_Hostmap_list(char* output, unsigned int max,
-                            unsigned int offset, int* actual);
-
 /*
   Put a task into the global task queue.
 

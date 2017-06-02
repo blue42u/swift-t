@@ -66,37 +66,6 @@ int ADLB_Is_leader() {
 	return ADLBX_GetComm_leaders() != MPI_COMM_NULL;
 }
 
-adlb_code ADLB_Hostmap_stats(unsigned int* count,
-                             unsigned int* name_max) {
-#if DEBUG
-	printf("Hostmap_stats\n");
-#endif
-	return ADLBX_Hostmap_stats(count, name_max);
-}
-
-adlb_code ADLB_Hostmap_lookup(const char* name, int count,
-                              int* output, int* actual) {
-#if DEBUG
-	printf("Hostmap_lookup\n");
-#endif
-	return ADLBX_Hostmap_lookup(name, count, output, actual);
-}
-
-/**
-   Obtain RS-separated buffer of host names
-   @param output: OUT Buffer into which to write result
-   @param max: Maximal number of characters to write
-   @param offset: start with this hostname
-   @param actual: out number of hostnames written
- */
-adlb_code ADLB_Hostmap_list(char* output, unsigned int max,
-                            unsigned int offset, int* actual) {
-#if DEBUG
-	printf("Hostmap_list\n");
-#endif
-	return ADLBX_Hostmap_list(output, max, offset, actual);
-}
-
 /*
   Put a task into the global task queue.
 

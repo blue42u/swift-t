@@ -733,73 +733,6 @@ ADLB_Workers_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
-ADLB_Hostmap_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
-                        int objc, Tcl_Obj *const objv[])
-{
-  // This is limited only by the number of ranks a user could
-  // conceivably put on a node- getting bigger
-  int count = 512;
-  int ranks[count];
-  int actual;
-
-  char* name = Tcl_GetString(objv[1]);
-
-  adlb_code rc = ADLB_Hostmap_lookup(name, count, ranks, &actual);
-  TCL_CONDITION(rc == ADLB_SUCCESS || rc == ADLB_NOTHING,
-                "error in hostmap!");
-  if (rc == ADLB_NOTHING)
-    TCL_RETURN_ERROR("host not found: %s", name);
-
-  Tcl_Obj* items[actual];
-  for (int i = 0; i < actual; i++)
-    items[i] = Tcl_NewIntObj(ranks[i]);
-
-  Tcl_Obj* result = Tcl_NewListObj(actual, items);
-  Tcl_SetObjResult(interp, result);
-
-  return TCL_OK;
-}
-
-/**
-    Output a list containing the entries of the hostmap
-    Note that the Turbine version of this function is different
- */
-static int
-ADLB_Hostmap_List_Cmd(ClientData cdata, Tcl_Interp *interp,
-                      int objc, Tcl_Obj *const objv[])
-{
-  uint count;
-  uint name_max;
-  ADLB_Hostmap_stats(&count, &name_max);
-  // Extra byte per name for RS
-  uint chars = count*(name_max+1);
-  char* buffer = malloc(chars * sizeof(char));
-
-  int actual;
-  ADLB_Hostmap_list(buffer, chars, 0, &actual);
-  assert(actual == count);
-
-  Tcl_Obj* names[count];
-  char* p = buffer;
-  for (int i = 0; i < count; i++)
-  {
-    char* t = strchr(p, '\r');
-    assert(t != NULL);
-    *t = '\0';
-    Tcl_Obj* name = Tcl_NewStringObj(p, (int) (t-p));
-    names[i] = name;
-    p = t+1;
-  }
-
-  free(buffer);
-
-  assert(count <= INT_MAX);
-  Tcl_Obj* result = Tcl_NewListObj((int)count, names);
-  Tcl_SetObjResult(interp, result);
-  return TCL_OK;
-}
-
 /**
    usage: adlb::put ~~<reserve_rank> <work type>~~ <work unit> <priority>
                     <parallelism> [<soft target>]
@@ -5787,8 +5720,6 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("size",      ADLB_Size_Cmd);
   COMMAND("servers",   ADLB_Servers_Cmd);
   COMMAND("workers",   ADLB_Workers_Cmd);
-  COMMAND("hostmap_lookup",   ADLB_Hostmap_Lookup_Cmd);
-  COMMAND("hostmap_list",     ADLB_Hostmap_List_Cmd);
   COMMAND("get_priority",   ADLB_Get_Priority_Cmd);
   COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);
   COMMAND("set_priority",   ADLB_Set_Priority_Cmd);
