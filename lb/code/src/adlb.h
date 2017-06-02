@@ -28,7 +28,7 @@
    These are the functions available to ADLB application code
  */
 
-MPI_Comm ADLB_Init_comm();
+void ADLB_Init_comm();
 
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
                     int *am_server);
@@ -46,6 +46,8 @@ int ADLB_GetRank_workers();
 MPI_Comm ADLB_GetComm_workers(void);
 
 MPI_Comm ADLB_GetComm_leaders(void);
+
+int ADLB_Is_leader();
 
 adlb_code ADLB_Hostmap_stats(unsigned int* count,
                              unsigned int* name_max);

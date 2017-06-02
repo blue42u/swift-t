@@ -118,14 +118,12 @@ namespace eval turbine {
     }
 
     proc leader_hook { } {
-        if { [ adlb::comm_get leaders ] == [ adlb::comm_get null ] } {
-            # I am not a leader
-            return
-        }
-        global env
-        if [ info exists env(TURBINE_LEADER_HOOK) ] {
-            log "TURBINE_LEADER_HOOK: $env(TURBINE_LEADER_HOOK)"
-            eval $env(TURBINE_LEADER_HOOK)
+        if { [ adlb::is_leader ] } {
+            global env
+            if [ info exists env(TURBINE_LEADER_HOOK) ] {
+                log "TURBINE_LEADER_HOOK: $env(TURBINE_LEADER_HOOK)"
+                eval $env(TURBINE_LEADER_HOOK)
+            }
         }
     }
 }

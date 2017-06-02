@@ -9,13 +9,12 @@ static MPI_Comm work_comm;
 /*
    These are the functions available to ADLB application code
  */
-MPI_Comm ADLB_Init_comm() {
+void ADLB_Init_comm() {
 	int argc = 0;
 	char** argv = NULL;
 	MPI_Init(&argc, &argv);
 	//assert(rc == MPI_SUCCESS);	// Just hope it works...
 	MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-	return comm;
 }
 
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
@@ -74,6 +73,13 @@ MPI_Comm ADLB_GetComm_leaders(void) {
 	printf("GetComm_leaders %x\n", c);
 #endif
 	return c;
+}
+
+int ADLB_Is_leader() {
+#if DEBUG
+	printf("Is_leader\n");
+#endif
+	return ADLBX_GetComm_leaders() != MPI_COMM_NULL;
 }
 
 adlb_code ADLB_Hostmap_stats(unsigned int* count,
@@ -651,7 +657,10 @@ adlb_code ADLB_Finalize(void) {
 #if DEBUG
 	printf("Finalize\n");
 #endif
-	return ADLBX_Finalize();
+	adlb_code o = ADLBX_Finalize();
+	MPI_Comm_free(&comm);
+	MPI_Finalize();
+	return o;
 }
 
 /**

@@ -85,9 +85,6 @@ static bool adlb_comm_init = false;
 /** If ADLB fully initialized */
 static bool adlb_init = false;
 
-/** The communicator to use in our ADLB instance */
-MPI_Comm adlb_comm = MPI_COMM_NULL;
-
 /** Size of adlb_comm */
 int adlb_comm_size = -1;
 
@@ -288,9 +285,6 @@ static int field_name_objs_finalize(Tcl_Interp *interp,
 /* current priority for rule */
 int ADLB_curr_priority = DEFAULT_PRIORITY;
 
-/** We only free this if we are the outermost MPI communicator */
-static bool must_comm_free = false;
-
 #define CHECK_ADLB_STORE(rc, id, sub) {                                      \
   if (adlb_has_sub((sub))) {                                                 \
     TCL_CONDITION(rc != ADLB_REJECTED,                                       \
@@ -365,7 +359,7 @@ static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(!adlb_comm_init, "ADLB Communicator already initialized");
 
-  adlb_comm = ADLB_Init_comm();
+  ADLB_Init_comm();
 
   adlb_comm_init = true;
 
@@ -732,27 +726,11 @@ ADLB_CommSize_Cmd(ClientData cdata, Tcl_Interp *interp,
 }
 
 static int
-ADLB_CommGet_Cmd(ClientData cdata, Tcl_Interp *interp,
+ADLB_IsLeader_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(2);
-  char* comm_name = Tcl_GetString(objv[1]);
-  MPI_Comm comm;
-  if (strcmp(comm_name, "world") == 0)
-    comm = MPI_COMM_WORLD;
-  else if (strcmp(comm_name, "adlb") == 0)
-    comm = MPI_COMM_WORLD;
-  else if (strcmp(comm_name, "null") == 0)
-    comm = MPI_COMM_NULL;
-  else if (strcmp(comm_name, "leaders") == 0)
-    comm = ADLB_GetComm_leaders();
-  else if (strcmp(comm_name, "workers") == 0)
-    comm = ADLB_GetComm_workers();
-  else
-    return turbine_user_errorv
-      (interp, "adlb::comm_get: error: unknown comm: %s", comm_name);
-  Tcl_Obj* result = Tcl_NewLongObj(comm);
-  Tcl_SetObjResult(interp, result);
+  TCL_ARGS(1);
+  Tcl_SetObjResult(interp, Tcl_NewBooleanObj(ADLB_Is_leader()));
   return TCL_OK;
 }
 
@@ -5821,8 +5799,7 @@ ADLB_Abort_Cmd(ClientData cdata, Tcl_Interp *interp,
 
 
 /**
-   usage: adlb::finalize <b>
-   If b, finalize MPI
+   usage: adlb::finalize
  */
 static int
 ADLB_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -5834,21 +5811,15 @@ ADLB_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
   rc = field_name_objs_finalize(interp, objv);
   TCL_CHECK(rc);
 
+  TCL_ARGS(1);
+
   rc = ADLB_Finalize();
   if (rc != ADLB_SUCCESS)
     printf("WARNING: ADLB_Finalize() failed!\n");
-  TCL_ARGS(2);
-  int b;
-  Tcl_GetBooleanFromObj(interp, objv[1], &b);
-
-  if (must_comm_free)
-    MPI_Comm_free(&adlb_comm);
 
   adlb_comm_init = false;
   adlb_init = false;
 
-  if (b)
-    MPI_Finalize();
   turbine_debug_finalize();
 
   rc = blob_cache_finalize();
@@ -5905,7 +5876,7 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("server",    ADLB_Server_Cmd);
   COMMAND("rank",      ADLB_CommRank_Cmd);
   COMMAND("size",      ADLB_CommSize_Cmd);
-  COMMAND("comm_get",  ADLB_CommGet_Cmd);
+  COMMAND("is_leader",  ADLB_IsLeader_Cmd);
   COMMAND("barrier",   ADLB_Barrier_Cmd);
   COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
