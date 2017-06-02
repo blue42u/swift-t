@@ -56,7 +56,6 @@
 #include "src/turbine/turbine.h"
 #include "src/turbine/cache.h"
 #include "src/turbine/worker.h"
-#include "src/turbine/io.h"
 #include "src/turbine/sync_exec.h"
 
 #include "src/turbine/async_exec.h"
