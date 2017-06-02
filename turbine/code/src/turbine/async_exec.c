@@ -362,7 +362,7 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
           int adlb_work_type, get_req_state *reqs,
           bool poll, int max_tasks, bool *got_tasks)
 {
-  adlb_code ac;
+  adlb_code ac = ADLB_ERROR;
   int rc;
   int desired_reqs = (max_tasks < reqs->max_reqs) ?
                       max_tasks : reqs->max_reqs;
@@ -380,15 +380,15 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
 
     // Use temporary arrays to get contiguous items
     adlb_get_req tmp_reqs[extra_reqs];
-    adlb_payload_buf tmp_bufs[extra_reqs];
+    /*adlb_payload_buf tmp_bufs[extra_reqs];
     for (int i = 0; i < extra_reqs; i++)
     {
       tmp_bufs[i] = reqs->buffers[(reqs->head + i) % reqs->max_reqs];
-    }
+    }*/
 
     // Block if not polling and new request is head
-    bool block = !poll && reqs->nreqs == 0;
-    ac = ADLB_Amget(adlb_work_type, extra_reqs, block, tmp_bufs, tmp_reqs);
+    //bool block = !poll && reqs->nreqs == 0;
+    //ac = ADLB_Amget(adlb_work_type, extra_reqs, block, tmp_bufs, tmp_reqs);
     EXEC_ADLB_CHECK_MSG(ac, TURBINE_EXEC_OTHER,
                           "Error getting work from ADLB");
 
@@ -405,12 +405,12 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
   DEBUG_EXECUTOR("reqs->tail=%i reqs->head=%i", reqs->tail, reqs->head);
   while (reqs->nreqs > 0)
   {
-    adlb_get_req *req = &reqs->requests[reqs->tail];
+    //adlb_get_req *req = &reqs->requests[reqs->tail];
     DEBUG_EXECUTOR("Check request %i", reqs->tail);
-    int work_len, answer_rank, type_recved;
+    int work_len = 5; //, answer_rank, type_recved;
     if (poll)
     {
-      ac = ADLB_Aget_test(req, &work_len, &answer_rank, &type_recved);
+      //ac = ADLB_Aget_test(req, &work_len, &answer_rank, &type_recved);
       EXEC_ADLB_CHECK_MSG(ac, TURBINE_EXEC_OTHER,
                           "Error getting work from ADLB");
 
@@ -429,7 +429,7 @@ get_tasks(Tcl_Interp *interp, turbine_executor *executor,
     }
     else
     {
-      ac = ADLB_Aget_wait(req, &work_len, &answer_rank, &type_recved);
+      //ac = ADLB_Aget_wait(req, &work_len, &answer_rank, &type_recved);
       if (ac == ADLB_SHUTDOWN)
       {
         DEBUG_EXECUTOR("Async executor loop for %s got shutdown signal",

@@ -411,6 +411,7 @@ namespace eval turbine {
             SERVER  { adlb::server }
             WORK  { standard_worker $rules $startup_cmd }
             default {
+              turbine_error "A thread isn't WORK or SERVER!"
               custom_worker $rules $startup_cmd $mode
             }
         }
