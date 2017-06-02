@@ -334,9 +334,6 @@ ADLB_Acquire_Ref_Impl(ClientData cdata, Tcl_Interp *interp,
 
    Setup ADLB communicator and MPI if needed, but no other parts of ADLB.
 
-   If comm is given, run ADLB in that communicator
-   Else, run ADLB in a dup of MPI_COMM_WORLD
-
    After this is run, adlb::size and adlb::rank can be used.
  */
 static int
@@ -646,22 +643,6 @@ ADLB_Server_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
-ADLB_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
-                 int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(2);
-  int rc;
-  int comm_int;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[1]));
-  MPI_Comm comm = (MPI_Comm) comm_int;
-
-  rc = MPI_Barrier(comm);
-  ASSERT(rc == MPI_SUCCESS);
-  return TCL_OK;
-}
-
 /*
  * adlb::worker_barrier
  * Barrier for all workers.
@@ -690,35 +671,10 @@ ADLB_CommRank_Cmd(ClientData cdata, Tcl_Interp *interp,
     TCL_CONDITION(adlb_comm_init, "ADLB communicator not initialized");
     result = adlb_comm_rank;
   }
-  else if (objc == 2)
-  {
-    int comm_int;
-    int rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-    TCL_CHECK_MSG(rc, "Not an integer: %i", comm_int);
-    MPI_Comm comm = (MPI_Comm) comm_int;
-    MPI_Comm_rank(comm, &result);
-  }
   else
-    TCL_RETURN_ERROR("requires 1 or 2 arguments!");
+    TCL_RETURN_ERROR("requires 0 arguments!");
 
   Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
-  return TCL_OK;
-}
-
-static int
-ADLB_CommSize_Cmd(ClientData cdata, Tcl_Interp *interp,
-                     int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(2)
-  int comm_int;
-  int rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %i", comm_int);
-  MPI_Comm comm = (MPI_Comm) comm_int;
-
-  int size;
-  MPI_Comm_size(comm, &size);
-  Tcl_Obj* result = Tcl_NewIntObj(size);
-  Tcl_SetObjResult(interp, result);
   return TCL_OK;
 }
 
@@ -5867,9 +5823,7 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
   COMMAND("server",    ADLB_Server_Cmd);
   COMMAND("rank",      ADLB_CommRank_Cmd);
-  COMMAND("size",      ADLB_CommSize_Cmd);
   COMMAND("is_leader",  ADLB_IsLeader_Cmd);
-  COMMAND("barrier",   ADLB_Barrier_Cmd);
   COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
   COMMAND("amserver",  ADLB_AmServer_Cmd);

@@ -1687,57 +1687,6 @@ static int parse_coaster_opts(Tcl_Interp *interp, Tcl_Obj *const objv[],
 }
 #endif
 
-static int
-Turbine_CopyTo_Cmd(ClientData cdata, Tcl_Interp *interp,
-                   int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(4);
-  int comm_int;
-  int rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[1]));
-  const char* name_in  = Tcl_GetString(objv[2]);
-  const char* name_out = Tcl_GetString(objv[3]);
-
-  MPI_Comm comm = (MPI_Comm) comm_int;
-  bool result = turbine_io_copy_to(comm, name_in, name_out);
-  TCL_CONDITION(result, "Could not copy: %s to %s",
-                name_in, name_out);
-  return TCL_OK;
-}
-
-static int
-Turbine_Bcast_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  // Unpack
-  TCL_ARGS(4);
-  int rc;
-  int comm_int;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[1]));
-  int root;
-  rc = Tcl_GetIntFromObj(interp, objv[2], &root);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[2]));
-  MPI_Comm comm = (MPI_Comm) comm_int;
-  char* name  = Tcl_GetString(objv[3]);
-
-  // Switch on bcast root
-  char* s;
-  int rank;
-  MPI_Comm_rank(comm, &rank);
-  if (rank == root)
-    s = (char*) Tcl_GetVar(interp, name, EMPTY_FLAG);
-
-  // Execute
-  int length;
-  turbine_io_bcast(comm, &s, &length);
-
-  // Return
-  if (rank != root)
-    Tcl_SetVar(interp, name, s, EMPTY_FLAG);
-  return TCL_OK;
-}
-
 /**
    Called when Tcl loads this extension
  */
@@ -1787,9 +1736,6 @@ Tclturbine_Init(Tcl_Interp* interp)
 
   COMMAND("coaster_register", Coaster_Register_Cmd);
   COMMAND("coaster_run", Coaster_Run_Cmd);
-
-  COMMAND("bcast",   Turbine_Bcast_Cmd);
-  COMMAND("copy_to", Turbine_CopyTo_Cmd);
 
   Tcl_Namespace* turbine =
     Tcl_FindNamespace(interp, "::turbine::c", NULL, 0);
