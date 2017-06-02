@@ -346,8 +346,8 @@ static inline int rule_opts_from_list(Tcl_Interp* interp,
 
 /**
    usage:
-   rule [ list inputs ] action [ name ... ] [ work_type ... ]
-                             [ target ... ] [ parallelism ... ]
+   rule [ list inputs ] action [ name ... ] [ ~~work_type ...~~ ]
+                             [ ~~target ...~~ ] [ parallelism ... ]
                              [ soft_target ... ]
              keyword args are optional
    DEFAULTS: name=<first token of action plus output list>
@@ -404,8 +404,7 @@ Turbine_Rule_Cmd(ClientData cdata, Tcl_Interp* interp,
 
   rule_log(inputs, input_list, action);
 
-  adlb_code ac = ADLB_Dput(action, action_len, opts.target,
-        adlb_comm_rank, opts.work_type, opts.opts, opts.name,
+  adlb_code ac = ADLB_Dput(action, action_len, opts.opts, opts.name,
         input_list, inputs, input_pair_list, input_pairs);
   TCL_CONDITION(ac == ADLB_SUCCESS, "could not process rule!");
 

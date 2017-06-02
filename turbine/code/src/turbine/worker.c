@@ -57,9 +57,7 @@ turbine_worker_loop(Tcl_Interp* interp,
     void* payload = buffer;
     int task_size = buffer_size;
 
-    int answer_rank, type_recved;
-    adlb_code code = ADLB_Get(work_type, &payload, &task_size, MAX_TASK,
-                              &answer_rank, &type_recved);
+    adlb_code code = ADLB_Get(&payload, &task_size, MAX_TASK);
     if (code == ADLB_SHUTDOWN)
       break;
     if (code != ADLB_SUCCESS)
@@ -67,7 +65,6 @@ turbine_worker_loop(Tcl_Interp* interp,
       printf("Get failed with code %i\n", code);
       return TURBINE_ERROR_ADLB;
     }
-    assert(type_recved == work_type);
 
     char* command = payload;
     DEBUG_TURBINE("eval: %s", command);

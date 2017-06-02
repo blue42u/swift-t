@@ -8,6 +8,7 @@
 #include "server.h"
 #include "sync.h"
 #include "engine.h"
+#include "adlb-x.h"
 
 #define MAX_NOTIF_PAYLOAD (32+ADLB_DATA_SUBSCRIPT_MAX)
 
@@ -87,7 +88,7 @@ static adlb_code notify_nonlocal(int target, int server,
     rc = xlb_sync(server);
     ADLB_CHECK(rc);
   }
-  rc = ADLB_Put(payload, length, target, answer_rank, work_type, opts);
+  rc = ADLBX_Put(payload, length, target, answer_rank, work_type, opts);
   ADLB_CHECK(rc);
   return ADLB_SUCCESS;
 }

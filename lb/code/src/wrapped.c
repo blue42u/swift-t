@@ -107,20 +107,14 @@ adlb_code ADLB_Hostmap_list(char* output, unsigned int max,
 
   @param payload: data buffer containing task data
   @param length: length of the payload in bytes
-  @param target: target rank for task, adlb_rank_any if any target
-  @param answer: answer rank passed to receiver of task
-  @param type: task type
-  @param priority: priority of task
-  @param parallelism: number of ranks to execute task
-              (1 for serial tasks, > 1 for parallel tasks)
   @param opts: additional options
  */
-adlb_code ADLB_Put(const void* payload, int length, int target, int answer,
-                   int type, adlb_put_opts opts) {
+adlb_code ADLB_Put(const void* payload, int length, adlb_put_opts opts) {
 #if DEBUG
 	printf("Put\n");
 #endif
-	return ADLBX_Put(payload, length, target, answer, type, opts);
+	return ADLBX_Put(payload, length, ADLB_RANK_ANY, ADLB_RANK_NULL,
+		0, opts);
 }
 
 /*
@@ -133,40 +127,37 @@ adlb_code ADLB_Put(const void* payload, int length, int target, int answer,
   @param wait_id_subs: array of id/subscript pairs to wait for
   @param wait_id_sub_count: length of wait_id_subs array
  */
-adlb_code ADLB_Dput(const void* payload, int length, int target,
-        int answer, int type, adlb_put_opts opts, const char *name,
+adlb_code ADLB_Dput(const void* payload, int length, adlb_put_opts opts,
+	const char *name,
         const adlb_datum_id *wait_ids, int wait_id_count, 
         const adlb_datum_id_sub *wait_id_subs, int wait_id_sub_count) {
 #if DEBUG
 	printf("Dput\n");
 #endif
-	return ADLBX_Dput(payload, length, target, answer, type, opts, name, wait_ids, wait_id_count, wait_id_subs, wait_id_sub_count);
+	return ADLBX_Dput(payload, length, ADLB_RANK_ANY, ADLB_RANK_NULL,
+		0, opts, name, wait_ids, wait_id_count, wait_id_subs,
+		wait_id_sub_count);
 }
 
 /*
   Get a task from the global task queue.
-  @param type_requested: the type of work requested
   @param payload IN/OUT Pointer into which to receive task
                         May be changed if too small, in which case
                         caller must free the new value
                         Caller should compare payload before and after
   @param length IN/OUT original initial/actual length of payload
   @param length IN Limit for allocating new payload
-  @param answer OUT parameter for answer rank specified in ADLB_Put
-                    for task
-  @param type_recvd OUT parameter for actual type of task
   @param comm   OUT parameter for MPI communicator to use for
                 executing parallel task
  */
-adlb_code ADLB_Get(int type_requested, void** payload,
-                   int* length, int max_length,
-                   int* answer, int* type_recvd) {
+adlb_code ADLB_Get(void** payload, int* length, int max_length) {
 #if DEBUG
 	printf("Get\n");
 #endif
 	MPI_Comm tmp;
-	return ADLBX_Get(type_requested, payload, length, max_length,
-		answer, type_recvd, &tmp);
+	int a,t;
+	return ADLBX_Get(0, payload, length, max_length,
+		&a, &t, &tmp);
 }
 
 /*
@@ -176,14 +167,14 @@ adlb_code ADLB_Get(int type_requested, void** payload,
 
   NOTE: Iget does not currently support parallel tasks
 */
-adlb_code ADLB_Iget(int type_requested, void* payload, int* length,
-                    int* answer, int* type_recvd) {
+adlb_code ADLB_Iget(void* payload, int* length) {
 #if DEBUG
 	printf("Iget\n");
 #endif
 	MPI_Comm tmp;
-	return ADLBX_Iget(type_requested, payload, length, answer,
-		type_recvd, &tmp);
+	int a,t;
+	return ADLBX_Iget(0, payload, length, &a,
+		&t, &tmp);
 }
 
 /**

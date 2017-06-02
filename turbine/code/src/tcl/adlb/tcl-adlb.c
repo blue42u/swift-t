@@ -815,7 +815,7 @@ ADLB_Hostmap_List_Cmd(ClientData cdata, Tcl_Interp *interp,
 }
 
 /**
-   usage: adlb::put <reserve_rank> <work type> <work unit> <priority>
+   usage: adlb::put ~~<reserve_rank> <work type>~~ <work unit> <priority>
                     <parallelism> [<soft target>]
 */
 static int
@@ -825,21 +825,14 @@ ADLB_Put_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CONDITION(objc >= 6 && objc <= 8, "Expected 5 to 7 arguments");
   int rc;
 
-  int target_rank;
-  int work_type;
   adlb_put_opts opts = ADLB_DEFAULT_PUT_OPTS;
-  Tcl_GetIntFromObj(interp, objv[1], &target_rank);
-  Tcl_GetIntFromObj(interp, objv[2], &work_type);
   int cmd_len;
   char* cmd = Tcl_GetStringFromObj(objv[3], &cmd_len);
   Tcl_GetIntFromObj(interp, objv[4], &opts.priority);
   Tcl_GetIntFromObj(interp, objv[5], &opts.parallelism);
 
-  if (target_rank >= 0)
-  {
-    opts.strictness = ADLB_TGT_STRICT_HARD;
-    opts.accuracy = ADLB_TGT_ACCRY_RANK;
-  }
+  opts.strictness = ADLB_TGT_STRICT_HARD;
+  opts.accuracy = ADLB_TGT_ACCRY_RANK;
 
   if (objc >= 7)
   {
@@ -856,15 +849,14 @@ ADLB_Put_Cmd(ClientData cdata, Tcl_Interp *interp,
              target_rank, work_type, cmd, opts.priority);
 
 
-  adlb_code ac = ADLB_Put(cmd, cmd_len+1, target_rank, adlb_comm_rank,
-                    work_type, opts);
+  adlb_code ac = ADLB_Put(cmd, cmd_len+1, opts);
   TCL_CONDITION(ac == ADLB_SUCCESS, "ADLB_Put failed!");
   return TCL_OK;
 }
 
 /**
    Special-case put that takes no special arguments
-   usage: adlb::spawn <work type> <work unit>
+   usage: adlb::spawn ~~<work type>~~ <work unit>
 */
 static int
 ADLB_Spawn_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -872,8 +864,6 @@ ADLB_Spawn_Cmd(ClientData cdata, Tcl_Interp *interp,
 {
   TCL_ARGS(3);
 
-  int work_type;
-  Tcl_GetIntFromObj(interp, objv[1], &work_type);
   int cmd_len;
   char* cmd = Tcl_GetStringFromObj(objv[2], &cmd_len);
 
@@ -882,8 +872,7 @@ ADLB_Spawn_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   DEBUG_ADLB("adlb::spawn: type: %i \"%s\" %i",
              work_type, cmd, opts.priority);
-  int rc = ADLB_Put(cmd, cmd_len+1, ADLB_RANK_ANY, adlb_comm_rank,
-                    work_type, opts);
+  int rc = ADLB_Put(cmd, cmd_len+1, opts);
 
   ASSERT(rc == ADLB_SUCCESS);
   return TCL_OK;
@@ -932,10 +921,10 @@ ADLB_Set_Priority_Cmd(ClientData cdata, Tcl_Interp *interp,
 }
 
 /**
-   usage: adlb::get <req_type> <answer_rank>
+   usage: adlb::get ~~<req_type>~~ <answer_rank>
    Returns the next work unit of req_type or empty string when
    ADLB is done
-   Stores answer_rank in given output variable
+   Stores ~~answer_rank~~ 0 in given output variable
  */
 static int
 ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -943,20 +932,14 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
 {
   TCL_ARGS(3);
 
-  int req_type;
-  int error = Tcl_GetIntFromObj(interp, objv[1], &req_type);
-  TCL_CHECK(error);
   Tcl_Obj* tcl_answer_rank_name = objv[2];
   DEBUG_ADLB("adlb::get: type=%i", req_type);
-
-  int work_type;
 
   void* payload = NULL;
 #ifdef USE_ADLB
   int work_handle[ADLB_HANDLE_SIZE];
 #endif
   int work_len = 1000*1000*1000; // 1 GB
-  int answer_rank;
 #ifdef USE_ADLB
 
   int req_types[4];
@@ -1003,14 +986,12 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
 #endif
 
 #ifdef USE_XLB
-  int rc = ADLB_Get(req_type, &payload, &work_len, work_len,
-                    &answer_rank, &work_type);
+  int rc = ADLB_Get(&payload, &work_len, work_len);
   if (rc == ADLB_ERROR) TCL_RETURN_ERROR("Error getting work!");
   if (rc == ADLB_SHUTDOWN)
   {
     Tcl_SetObjResult(interp, Tcl_NewStringObj("", 0));
     work_len = 1;
-    answer_rank = ADLB_RANK_NULL;
   }
   else // Good work unit
   {
@@ -1021,7 +1002,7 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
 #endif
 
   // Store answer_rank in caller's stack frame
-  Tcl_Obj* tcl_answer_rank = Tcl_NewIntObj(answer_rank);
+  Tcl_Obj* tcl_answer_rank = Tcl_NewIntObj(0);
   Tcl_ObjSetVar2(interp, tcl_answer_rank_name, NULL, tcl_answer_rank,
                  EMPTY_FLAG);
 
@@ -1029,10 +1010,10 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
 }
 
 /**
-   usage: adlb::iget <req_type> <answer_rank>
+   usage: adlb::iget ~~<req_type>~~ <answer_rank>
    Returns the next work unit of req_type or
         "ADLB_SHUTDOWN" or "ADLB_NOTHING"
-   Stores answer_rank in given output variable
+   Stores ~~answer_rank~~ 0 in given output variable
  */
 static int
 ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -1040,36 +1021,27 @@ ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
 {
   TCL_ARGS(3);
 
-  int req_type;
-  int error = Tcl_GetIntFromObj(interp, objv[1], &req_type);
-  TCL_CHECK(error);
   Tcl_Obj* tcl_answer_rank_name = objv[2];
 
   DEBUG_ADLB("adlb::get: type=%i", req_type);
 
-  int work_type;
-
   char* result = &xfer[0];
   int work_len;
-  int answer_rank;
 
-  adlb_code rc = ADLB_Iget(req_type, result, &work_len,
-                           &answer_rank, &work_type);
+  adlb_code rc = ADLB_Iget(result, &work_len);
   if (rc == ADLB_SHUTDOWN)
   {
     strcpy(result, "ADLB_SHUTDOWN");
-    answer_rank = ADLB_RANK_NULL;
   }
   else if (rc == ADLB_NOTHING)
   {
     strcpy(result, "ADLB_NOTHING");
-    answer_rank = ADLB_RANK_NULL;
   }
 
   DEBUG_ADLB("adlb::iget: %s", result);
 
   // Store answer_rank in caller's stack frame
-  Tcl_Obj* tcl_answer_rank = Tcl_NewIntObj(answer_rank);
+  Tcl_Obj* tcl_answer_rank = Tcl_NewIntObj(0);
   Tcl_ObjSetVar2(interp, tcl_answer_rank_name, NULL, tcl_answer_rank,
                  EMPTY_FLAG);
 
