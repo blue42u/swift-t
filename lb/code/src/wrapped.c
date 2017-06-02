@@ -19,12 +19,11 @@ void ADLB_Init_comm() {
 
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[],
                     int *am_server) {
-	adlb_code r = ADLBX_Init(nservers, ntypes, type_vect,
-		am_server, comm, &work_comm);
 #if DEBUG
-	printf("Init %x %x\n", adlb_comm, *worker_comm);
+	printf("Init\n");
 #endif
-	return r;
+	return ADLBX_Init(nservers, ntypes, type_vect,
+		am_server, comm, &work_comm);
 }
 
 adlb_code ADLB_Server(long max_memory) {
