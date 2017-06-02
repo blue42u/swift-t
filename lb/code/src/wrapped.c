@@ -59,11 +59,6 @@ int ADLB_GetRank_workers() {
 	return out;
 }
 
-adlb_code ADLB_Barrier_worker() {
-	return (MPI_Barrier(ADLBX_GetComm_workers()) == MPI_SUCCESS)
-		? ADLB_SUCCESS : ADLB_ERROR;
-}
-
 int ADLB_Is_leader() {
 #if DEBUG
 	printf("Is_leader\n");

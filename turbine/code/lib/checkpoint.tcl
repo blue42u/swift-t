@@ -92,7 +92,7 @@ namespace eval turbine {
 
       if { [ llength $xpt_reload ] > 0 } {
         # Wait for everyone to finish loading
-        adlb::worker_barrier
+        #adlb::worker_barrier	# Doesn't make it here, but for sanity
         log "Finished loading checkpoint files on all workers"
       }
     }

@@ -370,7 +370,7 @@ namespace eval turbine {
 
     proc start { args } {
         # Start checkpointing before servers go into loop
-        turbine::xpt_init2
+        #turbine::xpt_init2	# Or not. Since it would eat performance.
 
         set rules [ lindex $args 0 ]
         if { [ llength $args ] > 1 } {

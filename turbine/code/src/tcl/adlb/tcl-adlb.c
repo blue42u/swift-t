@@ -58,6 +58,7 @@
 #include <adlb-defs.h>
 #include <adlb_types.h>
 #ifdef ENABLE_XPT
+#error "We don't support Checkpointing, for reasons."
 #include <adlb-xpt.h>
 #endif
 
@@ -640,21 +641,6 @@ ADLB_Server_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   TCL_CONDITION(rc == ADLB_SUCCESS, "SERVER FAILED");
 
-  return TCL_OK;
-}
-
-/*
- * adlb::worker_barrier
- * Barrier for all workers.
- * Should only be called by workers (i.e. non-adlb servers) and
- * must be called by all workers.
- */
-static int
-ADLB_Worker_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
-                 int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(1);
-  ASSERT(ADLB_Barrier_worker() == ADLB_SUCCESS);
   return TCL_OK;
 }
 
@@ -5796,7 +5782,6 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("server",    ADLB_Server_Cmd);
   COMMAND("rank",      ADLB_CommRank_Cmd);
   COMMAND("is_leader",  ADLB_IsLeader_Cmd);
-  COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
   COMMAND("amserver",  ADLB_AmServer_Cmd);
   COMMAND("size",      ADLB_Size_Cmd);

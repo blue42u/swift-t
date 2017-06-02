@@ -43,8 +43,6 @@ int ADLB_Get_size();
 
 int ADLB_GetRank_workers();
 
-adlb_code ADLB_Barrier_worker();
-
 int ADLB_Is_leader();
 
 adlb_code ADLB_Hostmap_stats(unsigned int* count,
