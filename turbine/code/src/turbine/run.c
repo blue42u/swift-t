@@ -37,20 +37,17 @@
 
 /*
   Run a Tcl script in a turbine instance
-  comm: communicator to use, MPI_COMM_NULL if there is no enclosing MPI
-        context, in which case we will initialize MPI
  */
 turbine_code
-turbine_run(MPI_Comm comm, const char* script_file,
+turbine_run(const char* script_file,
             int argc, char const *const * argv,
             char* output)
 {
-  return turbine_run_interp(comm, script_file, argc, argv, output,
-                            NULL);
+  return turbine_run_interp(script_file, argc, argv, output, NULL);
 }
 
 turbine_code
-turbine_run_interp(MPI_Comm comm, const char* script_file,
+turbine_run_interp(const char* script_file,
                    int argc, char const *const * argv,
                    char* output,
                    Tcl_Interp* interp)
@@ -64,12 +61,12 @@ turbine_run_interp(MPI_Comm comm, const char* script_file,
     return TURBINE_ERROR_INVALID;
   }
 
-  int rc =  turbine_run_string(comm, script, argc, argv, output, interp);
+  int rc =  turbine_run_string(script, argc, argv, output, interp);
   free(script);
   return rc;
 }
 
-turbine_code turbine_run_string(MPI_Comm comm, const char* script,
+turbine_code turbine_run_string(const char* script,
                                 int argc, char const *const * argv,
                                 char* output,
                                 Tcl_Interp* interp)

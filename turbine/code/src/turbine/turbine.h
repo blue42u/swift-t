@@ -58,18 +58,18 @@ int turbine_code_tostring(char* output, turbine_code code);
 
 void turbine_finalize(Tcl_Interp *interp);
 
-turbine_code turbine_run(MPI_Comm comm, const char* script_file,
+turbine_code turbine_run(const char* script_file,
                          int argc, char const *const * argv, char*  output);
 
 /*
   Run script stored in C string.
   interp: if not null, use this interpreter.  If null, create a fresh one
  */
-turbine_code turbine_run_string(MPI_Comm comm, const char* script,
+turbine_code turbine_run_string(const char* script,
                                 int argc, char const *const * argv, char* output,
                                 Tcl_Interp* interp);
 
-turbine_code turbine_run_interp(MPI_Comm comm, const char* script_file,
+turbine_code turbine_run_interp(const char* script_file,
                                 int argc, char const *const * argv, char* output,
                                 Tcl_Interp* interp);
 

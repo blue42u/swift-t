@@ -103,7 +103,7 @@ main(int argc, const char **argv)
   const char *script_file = NULL;
   if (has_main_string)
   {
-    tc = turbine_run_string(MPI_COMM_NULL, (const char*)@MAIN_SCRIPT_STRING@,
+    tc = turbine_run_string((const char*)@MAIN_SCRIPT_STRING@,
                             argc, argv, NULL, interp);
   }
   else
@@ -123,7 +123,7 @@ main(int argc, const char **argv)
       argv[i] = argv[i+1];
     }
     argc--;
-    tc = turbine_run_interp(MPI_COMM_NULL, script_file, argc, argv, NULL,
+    tc = turbine_run_interp(script_file, argc, argv, NULL,
                             interp);
   }
 
