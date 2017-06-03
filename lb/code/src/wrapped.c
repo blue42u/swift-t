@@ -490,45 +490,6 @@ adlb_code ADLB_Unlock(adlb_datum_id id) {
 	return ADLBX_Unlock(id);
 }
 
-/**
-  Get information about a type based on name.
-  Returns error if not found
- */
-adlb_code ADLB_Data_string_totype(const char* type_string,
-              adlb_data_type* type, adlb_type_extra *extra) {
-#if DEBUG
-	printf("Data_string_totype\n");
-#endif
-	return ADLBX_Data_string_totype(type_string, type, extra);
-}
-
-const char *ADLB_Data_type_tostring(adlb_data_type type) {
-#if DEBUG
-	printf("Data_type_tostring\n");
-#endif
-	return ADLBX_Data_type_tostring(type);
-}
-
-/*
-  Convert string to placement enum value.
-  Case insensitive.
- */
-adlb_code ADLB_string_to_placement(const char *string,
-                           adlb_placement *placement) {
-#if DEBUG
-	printf("string_to_placement\n");
-#endif
-	return ADLBX_string_to_placement(string, placement);
-}
-
-adlb_code ADLB_Server_idle(int rank, int64_t check_attempt, bool* result,
-                 int *request_counts, int *untargeted_work_counts) {
-#if DEBUG
-	printf("Server_idle\n");
-#endif
-	return ADLBX_Server_idle(rank, check_attempt, result, request_counts, untargeted_work_counts);
-}
-
 adlb_code ADLB_Finalize(void) {
 #if DEBUG
 	printf("Finalize\n");

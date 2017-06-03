@@ -31,6 +31,7 @@
 #include <tools.h>
 
 #include "adlb-p.h"
+#include "adlb-x.h"
 #include "adlb-mpe.h"
 #include "backoffs.h"
 #include "checks.h"
@@ -740,7 +741,7 @@ servers_idle()
     ASSERT(rc == ADLB_SUCCESS);
     int *req_subarray = &request_counts[xlb_s.types_size * server_num];
     int *work_subarray = &work_counts[xlb_s.types_size * server_num];
-    rc = ADLB_Server_idle(rank, xlb_idle_check_attempt, &idle,
+    rc = ADLBX_Server_idle(rank, xlb_idle_check_attempt, &idle,
                           req_subarray, work_subarray);
     ASSERT(rc == ADLB_SUCCESS);
 
