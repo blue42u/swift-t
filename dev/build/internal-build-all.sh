@@ -11,6 +11,12 @@ echo "Building c-utils in $PWD"
 ${THIS}/cutils-build.sh
 popd > /dev/null
 
+pushd ${XTASK_SRC} > /dev/null
+echo
+echo "Building xtask in $PWD"
+${THIS}/xtask-build.sh
+popd > /dev/null
+
 pushd ${LB_SRC} > /dev/null
 echo
 echo "Building lb in $PWD"

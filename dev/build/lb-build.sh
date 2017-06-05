@@ -60,6 +60,7 @@ if (( CONFIGURE )); then
     rm -f config.cache
     ./configure --config-cache \
                 --with-c-utils=${C_UTILS_INSTALL} \
+		--with-xtask=${XTASK_SRC} \
                 --prefix=${LB_INSTALL} \
                 CC=${CC} \
                 ${EXTRA_ARGS}

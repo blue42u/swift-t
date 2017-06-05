@@ -1,0 +1,3 @@
+[submodule "xtask"]
+	path = xtask
+	url = git@github.com:blue42u/xtask_simple.git

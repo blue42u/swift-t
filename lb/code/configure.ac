@@ -299,6 +299,20 @@ AC_ARG_ENABLE(dev,
     ENABLE_DEV=1)
 AC_SUBST(ENABLE_DEV)
 
+USE_XTASK=0
+AC_ARG_WITH(xtask,
+  AS_HELP_STRING(
+    [--with-xtask], [location of XTask]),
+  [
+    USE_XTASK=${withval}
+    AC_DEFINE_UNQUOTED([XTASK_LOCATION],
+                       ${withval}, [XTask location])
+  ],
+  [
+    [[ ${USE_XTASK} == 0 ]] && AC_MSG_ERROR([Not found: XTask])
+])
+AC_SUBST(USE_XTASK)
+
 AC_SUBST(CFLAGS)
 AC_SUBST(LDFLAGS)
 

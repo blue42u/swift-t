@@ -102,8 +102,9 @@ ARFLAGS = cr
 RANLIB  = @RANLIB@
 
 C_UTILS = @USE_C_UTILS@
+XTASK = @USE_XTASK@
 
-INCLUDES = -I . -I src -I $(C_UTILS)/include
+INCLUDES = -I . -I src -I $(C_UTILS)/include -I $(XTASK)
 
 SYSTEM_LIBS = $(shell cat system-libs.txt)
 
@@ -114,7 +115,7 @@ ifeq ($(USE_XLC),1)
 	CFLAGS += -qpack_semantic=gnu
 endif
 
-LIBS += -L $(C_UTILS)/lib -lexmcutils
+LIBS += -L $(C_UTILS)/lib -lexmcutils -L $(XTASK) -lxtask
 
 RPATH :=
 RPATH += -Wl,-rpath -Wl,$(C_UTILS)/lib
