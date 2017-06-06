@@ -1092,7 +1092,7 @@ xlb_recv_notif_work(const struct packed_notif_counts *counts,
     size_t pos = 0;
     for (int i = 0; i < extra_data_count; i++)
     {
-      dc = ADLB_Unpack_buffer(ADLB_DATA_TYPE_NULL, extra_data, bytes, &pos,
+      dc = ADLBX_Unpack_buffer(ADLB_DATA_TYPE_NULL, extra_data, bytes, &pos,
               &extra_data_ptrs[i].data, &extra_data_ptrs[i].length);
       ADLB_DATA_CHECK(dc);
     }

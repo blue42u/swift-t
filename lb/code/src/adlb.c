@@ -32,7 +32,7 @@
 #include <tools.h>
 
 #include "adlb-p.h"
-#include "adlb_types.h"
+#include "adlb-x_types.h"
 #include "adlb-version.h"
 #include "adlb-xpt.h"
 #include "checks.h"

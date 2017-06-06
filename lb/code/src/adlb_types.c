@@ -1,7 +1,7 @@
 
 #define _GNU_SOURCE // for asprintf()
 
-#include "adlb_types.h"
+#include "adlb-x_types.h"
 
 #include <stdint.h>
 #include <inttypes.h>
@@ -184,7 +184,7 @@ const char
 }
 
 adlb_data_code
-ADLB_Init_compound(adlb_datum_storage *d, adlb_data_type type,
+ADLBX_Init_compound(adlb_datum_storage *d, adlb_data_type type,
           adlb_type_extra type_extra, bool must_init)
 {
   adlb_data_code dc;
@@ -228,14 +228,14 @@ ADLB_Init_compound(adlb_datum_storage *d, adlb_data_type type,
 /*
   Whether we pad the vint size to VINT_MAX_BYTES
  */
-bool ADLB_pack_pad_size(adlb_data_type type)
+bool ADLBX_pack_pad_size(adlb_data_type type)
 {
   return type == ADLB_DATA_TYPE_MULTISET ||
          type == ADLB_DATA_TYPE_CONTAINER;
 }
 
 adlb_data_code
-ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
+ADLBX_Pack(const adlb_datum_storage *d, adlb_data_type type,
           const adlb_buffer *caller_buffer,
           adlb_binary_data *result)
 {
@@ -272,7 +272,7 @@ ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
         use_caller_buf = true;
       }
       size_t pos = 0;
-      dc = ADLB_Pack_buffer(d, type, false, NULL, &res, &use_caller_buf,
+      dc = ADLBX_Pack_buffer(d, type, false, NULL, &res, &use_caller_buf,
                             &pos);
       ADLB_DATA_CHECK_CODE(dc);
       result->data = result->caller_data = res.data;
@@ -289,7 +289,7 @@ ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
 }
 
 adlb_data_code
-ADLB_Append_buffer(adlb_data_type type, const void *data, size_t length,
+ADLBX_Append_buffer(adlb_data_type type, const void *data, size_t length,
     bool prefix_len, adlb_buffer *output, bool *output_caller_buffer,
     size_t *output_pos)
 {
@@ -307,7 +307,7 @@ ADLB_Append_buffer(adlb_data_type type, const void *data, size_t length,
     assert(vint_len >= 1);
     *output_pos += vint_len;
 
-    if (ADLB_pack_pad_size(type) && vint_len < VINT_MAX_BYTES)
+    if (ADLBX_pack_pad_size(type) && vint_len < VINT_MAX_BYTES)
     {
       // We expect the size to be padded for these
       size_t padding = VINT_MAX_BYTES - vint_len;
@@ -324,7 +324,7 @@ ADLB_Append_buffer(adlb_data_type type, const void *data, size_t length,
 
 
 adlb_data_code
-ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
+ADLBX_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
         bool prefix_len,
         const adlb_buffer *tmp_buf, adlb_buffer *output,
         bool *output_caller_buffer, size_t *output_pos)
@@ -332,7 +332,7 @@ ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
   adlb_data_code dc;
 
   // Some types are implemented by appending to buffer anyway
-  if (ADLB_pack_pad_size(type))
+  if (ADLBX_pack_pad_size(type))
   {
     // Reserve space at front to prefix serialized size in bytes
     size_t required = *output_pos + VINT_MAX_BYTES;
@@ -347,14 +347,14 @@ ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
     }
     if (type == ADLB_DATA_TYPE_CONTAINER)
     {
-      dc = ADLB_Pack_container(&d->CONTAINER, tmp_buf, output,
+      dc = ADLBX_Pack_container(&d->CONTAINER, tmp_buf, output,
                               output_caller_buffer, output_pos);
       ADLB_DATA_CHECK_CODE(dc);
     }
     else
     {
       assert(type == ADLB_DATA_TYPE_MULTISET);
-      dc = ADLB_Pack_multiset(d->MULTISET, tmp_buf, output,
+      dc = ADLBX_Pack_multiset(d->MULTISET, tmp_buf, output,
                               output_caller_buffer, output_pos);
       ADLB_DATA_CHECK_CODE(dc);
     }
@@ -370,10 +370,10 @@ ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
 
   // Get binary representation of datum
   adlb_binary_data packed;
-  dc = ADLB_Pack(d, type, tmp_buf, &packed);
+  dc = ADLBX_Pack(d, type, tmp_buf, &packed);
   ADLB_DATA_CHECK_CODE(dc);
 
-  dc = ADLB_Append_buffer(type, packed.data, packed.length,
+  dc = ADLBX_Append_buffer(type, packed.data, packed.length,
             prefix_len, output, output_caller_buffer, output_pos);
 
   // Free any malloced temporary memory
@@ -384,14 +384,14 @@ ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
 }
 
 adlb_data_code
-ADLB_Pack_container(const adlb_container *container,
+ADLBX_Pack_container(const adlb_container *container,
           const adlb_buffer *tmp_buf, adlb_buffer *output,
           bool *output_caller_buffer, size_t *output_pos)
 {
   adlb_data_code dc;
 
   const table_bp *members = container->members;
-  dc = ADLB_Pack_container_hdr(members->size,
+  dc = ADLBX_Pack_container_hdr(members->size,
       (adlb_data_type)container->key_type,
       (adlb_data_type)container->val_type,
       output, output_caller_buffer, output_pos);
@@ -408,12 +408,12 @@ ADLB_Pack_container(const adlb_container *container,
     dc = ADLB_Resize_buf(output, output_caller_buffer, required);
     ADLB_DATA_CHECK_CODE(dc);
 
-    dc = ADLB_Append_buffer(ADLB_DATA_TYPE_NULL,
+    dc = ADLBX_Append_buffer(ADLB_DATA_TYPE_NULL,
           table_bp_get_key(item), key_len,
           true, output, output_caller_buffer, output_pos);
     ADLB_DATA_CHECK_CODE(dc);
 
-    dc = ADLB_Pack_buffer(item->data, (adlb_data_type)container->val_type,
+    dc = ADLBX_Pack_buffer(item->data, (adlb_data_type)container->val_type,
             true, tmp_buf, output, output_caller_buffer, output_pos);
     ADLB_DATA_CHECK_CODE(dc);
 
@@ -430,7 +430,7 @@ ADLB_Pack_container(const adlb_container *container,
 }
 
 adlb_data_code
-ADLB_Pack_container_hdr(int elems, adlb_data_type key_type,
+ADLBX_Pack_container_hdr(int elems, adlb_data_type key_type,
         adlb_data_type val_type, adlb_buffer *output,
         bool *output_caller_buffer, size_t *output_pos)
 {
@@ -458,7 +458,7 @@ ADLB_Pack_container_hdr(int elems, adlb_data_type key_type,
 }
 
 adlb_data_code
-ADLB_Pack_multiset(const adlb_multiset_ptr ms,
+ADLBX_Pack_multiset(const adlb_multiset_ptr ms,
           const adlb_buffer *tmp_buf, adlb_buffer *output,
           bool *output_caller_buffer, size_t *output_pos)
 {
@@ -467,7 +467,7 @@ ADLB_Pack_multiset(const adlb_multiset_ptr ms,
   uint size = xlb_multiset_size(ms);
   assert(size <= INT_MAX);
 
-  dc = ADLB_Pack_multiset_hdr((int)size, (adlb_data_type)ms->elem_type,
+  dc = ADLBX_Pack_multiset_hdr((int)size, (adlb_data_type)ms->elem_type,
                       output, output_caller_buffer, output_pos);
   ADLB_DATA_CHECK_CODE(dc);
 
@@ -481,7 +481,7 @@ ADLB_Pack_multiset(const adlb_multiset_ptr ms,
     for (uint j = 0; j < chunk_len; j++)
     {
       // append value
-      dc = ADLB_Pack_buffer(&chunk->arr[j], (adlb_data_type)ms->elem_type,
+      dc = ADLBX_Pack_buffer(&chunk->arr[j], (adlb_data_type)ms->elem_type,
               true, tmp_buf, output, output_caller_buffer, output_pos);
       ADLB_DATA_CHECK_CODE(dc);
 
@@ -495,7 +495,7 @@ ADLB_Pack_multiset(const adlb_multiset_ptr ms,
 }
 
 adlb_data_code
-ADLB_Pack_multiset_hdr(int elems, adlb_data_type elem_type,
+ADLBX_Pack_multiset_hdr(int elems, adlb_data_type elem_type,
     adlb_buffer *output, bool *output_caller_buffer, size_t *output_pos)
 {
   adlb_data_code dc;
@@ -518,7 +518,7 @@ ADLB_Pack_multiset_hdr(int elems, adlb_data_type elem_type,
 }
 
 adlb_data_code
-ADLB_Unpack_buffer(adlb_data_type type,
+ADLBX_Unpack_buffer(adlb_data_type type,
         const void *buffer, size_t length, size_t *pos,
         const void **entry, size_t* entry_length)
 {
@@ -539,7 +539,7 @@ ADLB_Unpack_buffer(adlb_data_type type,
   ADLB_CHECK_MSG_CODE(vint_len >= 0, ADLB_DATA_ERROR_INVALID,
       "Error decoding entry length when unpacking buffer");
 
-  size_t vint_padded_len = ADLB_pack_pad_size(type) ?
+  size_t vint_padded_len = ADLBX_pack_pad_size(type) ?
                            VINT_MAX_BYTES : (size_t)vint_len;
   size_t remaining = length - curr_pos - vint_padded_len;
   ADLB_CHECK_MSG_CODE(entry_len <= remaining, ADLB_DATA_ERROR_INVALID,
@@ -552,16 +552,16 @@ ADLB_Unpack_buffer(adlb_data_type type,
   return ADLB_DATA_SUCCESS;
 }
 
-adlb_data_code ADLB_Unpack(adlb_datum_storage *d, adlb_data_type type,
+adlb_data_code ADLBX_Unpack(adlb_datum_storage *d, adlb_data_type type,
             const void *buffer, size_t length, adlb_refc refcounts)
 {
   // Ok to cast from const buffer since we retain ownership and
   // force it to copy
-  return ADLB_Unpack2(d, type, (void*)buffer, length, true, refcounts,
+  return ADLBX_Unpack2(d, type, (void*)buffer, length, true, refcounts,
                       true, NULL);
 }
 
-adlb_data_code ADLB_Unpack2(adlb_datum_storage *d, adlb_data_type type,
+adlb_data_code ADLBX_Unpack2(adlb_datum_storage *d, adlb_data_type type,
         void *buffer, size_t length, bool copy_buffer, adlb_refc refcounts,
         bool init_compound, bool *took_ownership)
 {
@@ -613,7 +613,7 @@ adlb_data_code ADLB_Unpack2(adlb_datum_storage *d, adlb_data_type type,
 }
 
 adlb_data_code
-ADLB_Unpack_container(adlb_container *container,
+ADLBX_Unpack_container(adlb_container *container,
     const void *data, size_t length, adlb_refc refcounts,
     bool init_cont)
 {
@@ -625,7 +625,7 @@ ADLB_Unpack_container(adlb_container *container,
   int entries;
   adlb_data_type key_type, val_type;
 
-  dc = ADLB_Unpack_container_hdr(data, length, &pos,
+  dc = ADLBX_Unpack_container_hdr(data, length, &pos,
         &entries, &key_type, &val_type);
   ADLB_DATA_CHECK_CODE(dc);
 
@@ -651,14 +651,14 @@ ADLB_Unpack_container(adlb_container *container,
     // unpack key/value pair and add to container
     const void *key, *val;
     size_t key_len, val_len;
-    dc = ADLB_Unpack_container_entry(key_type, val_type, data, length,
+    dc = ADLBX_Unpack_container_entry(key_type, val_type, data, length,
                                 &pos, &key, &key_len, &val, &val_len);
     ADLB_DATA_CHECK_CODE(dc);
 
     adlb_datum_storage *d = malloc(sizeof(adlb_datum_storage));
     ADLB_CHECK_MSG_CODE(d != NULL, ADLB_DATA_ERROR_OOM,
                   "error allocating memory");
-    dc = ADLB_Unpack(d, val_type, val, val_len, refcounts);
+    dc = ADLBX_Unpack(d, val_type, val, val_len, refcounts);
     ADLB_DATA_CHECK_CODE(dc);
 
     // TODO: handle case where key already exists
@@ -670,7 +670,7 @@ ADLB_Unpack_container(adlb_container *container,
 }
 
 adlb_data_code
-ADLB_Unpack_container_hdr(const void *data, size_t length, size_t *pos,
+ADLBX_Unpack_container_hdr(const void *data, size_t length, size_t *pos,
         int *entries, adlb_data_type *key_type, adlb_data_type *val_type)
 {
   const char *ptr = (const char*)data;
@@ -711,7 +711,7 @@ ADLB_Unpack_container_hdr(const void *data, size_t length, size_t *pos,
 }
 
 adlb_data_code
-ADLB_Unpack_container_entry(adlb_data_type key_type,
+ADLBX_Unpack_container_entry(adlb_data_type key_type,
           adlb_data_type val_type,
           const void *data, size_t length, size_t *pos,
           const void **key, size_t *key_len,
@@ -719,18 +719,18 @@ ADLB_Unpack_container_entry(adlb_data_type key_type,
 {
   // Key data not stored in typed way
   adlb_data_code dc;
-  dc = ADLB_Unpack_buffer(ADLB_DATA_TYPE_NULL, data, length,
+  dc = ADLBX_Unpack_buffer(ADLB_DATA_TYPE_NULL, data, length,
                   pos, key, key_len);
   ADLB_DATA_CHECK_CODE(dc);
 
-  dc = ADLB_Unpack_buffer(val_type, data, length,
+  dc = ADLBX_Unpack_buffer(val_type, data, length,
                   pos, val, val_len);
   ADLB_DATA_CHECK_CODE(dc);
   return ADLB_DATA_SUCCESS;
 }
 
 adlb_data_code
-ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
+ADLBX_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
         size_t length, adlb_refc refcounts, bool init_ms)
 {
   assert(ms != NULL);
@@ -741,7 +741,7 @@ ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
 
   int entries;
   adlb_data_type elem_type;
-  dc = ADLB_Unpack_multiset_hdr(data, length, &pos,
+  dc = ADLBX_Unpack_multiset_hdr(data, length, &pos,
                                 &entries, &elem_type);
   ADLB_DATA_CHECK_CODE(dc);
 
@@ -764,7 +764,7 @@ ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
     // unpack elem and add it
     const void *elem;
     size_t elem_len;
-    dc = ADLB_Unpack_multiset_entry(elem_type, data, length,
+    dc = ADLBX_Unpack_multiset_entry(elem_type, data, length,
                                     &pos, &elem, &elem_len);
     ADLB_DATA_CHECK_CODE(dc);
 
@@ -776,7 +776,7 @@ ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
 }
 
 adlb_data_code
-ADLB_Unpack_multiset_hdr(const void *data, size_t length, size_t *pos,
+ADLBX_Unpack_multiset_hdr(const void *data, size_t length, size_t *pos,
                 int *entries, adlb_data_type *elem_type)
 {
   int vint_len;
@@ -806,16 +806,16 @@ ADLB_Unpack_multiset_hdr(const void *data, size_t length, size_t *pos,
   Unpack value from buffer
  */
 adlb_data_code
-ADLB_Unpack_multiset_entry(adlb_data_type elem_type,
+ADLBX_Unpack_multiset_entry(adlb_data_type elem_type,
           const void *data, size_t length, size_t *pos,
           const void **elem, size_t *elem_len)
 {
-  return ADLB_Unpack_buffer(elem_type, data, length,
+  return ADLBX_Unpack_buffer(elem_type, data, length,
                             pos, elem, elem_len);
 }
 
 /* Free the memory associated with datum contents */
-adlb_data_code ADLB_Free_storage(adlb_datum_storage *d, adlb_data_type type)
+adlb_data_code ADLBX_Free_storage(adlb_datum_storage *d, adlb_data_type type)
 {
   adlb_data_code dc;
   switch (type)
@@ -854,7 +854,7 @@ adlb_data_code ADLB_Free_storage(adlb_datum_storage *d, adlb_data_type type)
   return ADLB_DATA_SUCCESS;
 }
 
-char *ADLB_Data_repr(const adlb_datum_storage *d, adlb_data_type type)
+char *ADLBX_Data_repr(const adlb_datum_storage *d, adlb_data_type type)
 {
   int rc;
   adlb_data_code dc;
@@ -996,7 +996,7 @@ xlb_resize_str(char **str, size_t *curr_size, int pos, size_t needed)
  * print anything.
  */
 adlb_data_code
-ADLB_Int64_parse(const char *str, size_t length, int64_t *result)
+ADLBX_Int64_parse(const char *str, size_t length, int64_t *result)
 {
   if (length == 0)
   {

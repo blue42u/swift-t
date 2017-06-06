@@ -81,7 +81,7 @@ static inline adlb_data_code resize_struct_types(adlb_struct_type new_type)
   return ADLB_DATA_SUCCESS;
 }
 
-adlb_data_code ADLB_Declare_struct_type(adlb_struct_type type,
+adlb_data_code ADLBX_Declare_struct_type(adlb_struct_type type,
                     const char *type_name,
                     int field_count,
                     const adlb_struct_field_type *field_types,
@@ -231,7 +231,7 @@ struct_subscript_pop(adlb_subscript *sub, int *field_ix,
 }
 
 adlb_data_code
-ADLB_Lookup_struct_type(adlb_struct_type type,
+ADLBX_Lookup_struct_type(adlb_struct_type type,
                   const char **type_name, int *field_count,
                   const adlb_struct_field_type **field_types,
                   char const* const** field_names)
@@ -287,7 +287,7 @@ static adlb_struct *alloc_struct(xlb_struct_type_info *t)
 }
 
 adlb_data_code
-ADLB_Unpack_struct(adlb_struct **s, const void *data, size_t length,
+ADLBX_Unpack_struct(adlb_struct **s, const void *data, size_t length,
                    adlb_refc refcounts, bool init_struct)
 {
   adlb_data_code dc;
@@ -354,7 +354,7 @@ ADLB_Unpack_struct(adlb_struct **s, const void *data, size_t length,
         ADLB_DATA_CHECK_CODE(dc);
       }
 
-      ADLB_Unpack(&(*s)->fields[i].data, t->field_types[i].type,
+      ADLBX_Unpack(&(*s)->fields[i].data, t->field_types[i].type,
                   field_start, field_len, refcounts);
       (*s)->fields[i].initialized = true;
     }
@@ -366,7 +366,7 @@ ADLB_Unpack_struct(adlb_struct **s, const void *data, size_t length,
 
 // Serialize struct into buffer.  Supports user passing in own fixed-size
 // buffer that is used if big enough.
-adlb_data_code ADLB_Pack_struct(const adlb_struct *s,
+adlb_data_code ADLBX_Pack_struct(const adlb_struct *s,
              const adlb_buffer *caller_buffer,
              adlb_binary_data *result)
 {
@@ -400,7 +400,7 @@ adlb_data_code ADLB_Pack_struct(const adlb_struct *s,
     bool init = s->fields[i].initialized;
     if (init)
     {
-      dc = ADLB_Pack(&s->fields[i].data, field_t, NULL, &field_data);
+      dc = ADLBX_Pack(&s->fields[i].data, field_t, NULL, &field_data);
       ADLB_DATA_CHECK_CODE(dc);
       assert(field_data.data != NULL);
     }
@@ -616,7 +616,7 @@ adlb_data_code xlb_struct_assign_field(adlb_struct_field *field,
 
   // Assign, initializing compound type if needed
   // Can safely cast data since we're forcing it to copy
-  dc = ADLB_Unpack2(&field->data, data_type, (void*)data, length, true,
+  dc = ADLBX_Unpack2(&field->data, data_type, (void*)data, length, true,
                     refcounts, !field->initialized, NULL);
   ADLB_DATA_CHECK_CODE(dc);
   field->initialized = true;

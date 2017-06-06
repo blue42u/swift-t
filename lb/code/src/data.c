@@ -31,7 +31,7 @@
 #include <vint.h>
 
 #include "adlb-p.h"
-#include "adlb_types.h"
+#include "adlb-x_types.h"
 #include "data.h"
 #include "data_cleanup.h"
 #include "data_internal.h"
@@ -247,7 +247,7 @@ xlb_data_create(adlb_datum_id id, adlb_data_type type,
 
   if (ADLB_Data_is_compound(type))
   {
-    dc = ADLB_Init_compound(&d->data, type, *type_extra, false);
+    dc = ADLBX_Init_compound(&d->data, type, *type_extra, false);
     ADLB_DATA_CHECK_CODE(dc);
     d->status.set = true;
   }
@@ -725,7 +725,7 @@ adlb_data_code xlb_data_container_reference(adlb_datum_id id,
 
   if (val_data != NULL)
   {
-    dc = ADLB_Pack(val_data, val_type, caller_buffer, result);
+    dc = ADLBX_Pack(val_data, val_type, caller_buffer, result);
     ADLB_DATA_CHECK_CODE(dc);
 
     // Get ownership in case internal pointer freed later
@@ -898,7 +898,7 @@ data_store_root(adlb_datum_id id, adlb_datum *d,
 
   // Handle store to top-level datum
   bool initialize = !d->status.set;
-  dc = ADLB_Unpack2(&d->data, d->type, buffer, length, copy,
+  dc = ADLBX_Unpack2(&d->data, d->type, buffer, length, copy,
                     store_refcounts, initialize, took_ownership);
   ADLB_DATA_CHECK_CODE(dc);
   d->status.set = true;
@@ -1009,7 +1009,7 @@ data_store_subscript(adlb_datum_id id, adlb_datum *d,
 
         // Now we are guaranteed to succeed
         adlb_datum_storage *entry = malloc(sizeof(adlb_datum_storage));
-        dc = ADLB_Unpack2(entry, (adlb_data_type)c->val_type, value,
+        dc = ADLBX_Unpack2(entry, (adlb_data_type)c->val_type, value,
                   length, copy, store_refcounts, true, took_ownership);
         ADLB_DATA_CHECK_CODE(dc);
 
@@ -1120,7 +1120,7 @@ data_store_subscript(adlb_datum_id id, adlb_datum *d,
             "Remaining bytes %zu", ADLB_PRIDSUB_ARGS(id, d->symbol,
               subscript), curr_sub.length - curr_sub_pos);
 
-          dc = ADLB_Init_compound(&d->data, field_type.type,
+          dc = ADLBX_Init_compound(&d->data, field_type.type,
                                   field_type.extra, true);
           ADLB_DATA_CHECK_CODE(dc);
         }
@@ -1232,7 +1232,7 @@ xlb_data_retrieve(adlb_datum_id id, adlb_subscript subscript,
     }
   }
 
-  dc = ADLB_Pack(val_data, val_type, caller_buffer, result);
+  dc = ADLBX_Pack(val_data, val_type, caller_buffer, result);
   ADLB_DATA_CHECK_CODE(dc);
 
   *type = val_type;
@@ -1505,7 +1505,7 @@ pack_member(adlb_container *cont, table_bp_entry *item,
   }
   if (include_vals)
   {
-    dc = ADLB_Pack_buffer(item->data, (adlb_data_type)cont->val_type,
+    dc = ADLBX_Pack_buffer(item->data, (adlb_data_type)cont->val_type,
           true, tmp_buf, result, result_caller_buffer, result_pos);
     ADLB_DATA_CHECK_CODE(dc);
   }
@@ -2123,7 +2123,7 @@ adlb_data_code append_notifs(adlb_datum_id id, adlb_datum *d,
       }
 
       adlb_binary_data packed_val;
-      dc = ADLB_Pack(val_data, val_type, NULL, &packed_val);
+      dc = ADLBX_Pack(val_data, val_type, NULL, &packed_val);
       ADLB_DATA_CHECK_CODE(dc);
 
       dc = ADLB_Own_data(NULL, &packed_val);

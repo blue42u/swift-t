@@ -22,7 +22,7 @@
 #define __XLB_XPT_INDEX_H
 
 #include "adlb-defs.h"
-#include "adlb_types.h"
+#include "adlb-x_types.h"
 
 typedef struct
 {

@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #include "adlb-defs.h"
-#include "adlb_types.h"
+#include "adlb-x_types.h"
 
 /* 4MB blocks.  TODO: not hardcoded */
 #define XLB_XPT_BLOCK_SIZE (4 * 1024 * 1024)
