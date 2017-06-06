@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "adlb.h"
+#include "adlb_types.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -7,22 +8,32 @@
 static int id, servers, workers;
 
 static pid_t pid;
-
 #define print(fmt, ...) printf("[%d] " fmt, pid, ## __VA_ARGS__)
+
+struct dec_entry {
+	char* name;
+	int count;
+	adlb_struct_field_type* fields;
+	char** names;
+};
+static struct dec_entry* structs;
+static int numstructs;
 
 void ADLB_Init_comm() {
 	workers = 2;	// Hardcoded for now
-	servers = 0;
-	id = 0;
+	id = xtask_setup(64, workers);
+	pid = getpid();
+
+	servers = 1;	// We assume one server. Hopefully it works out....
+	structs = NULL;
 }
 
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[], int *am_server) {
 	// Servers are workers with a low enough id.
-	servers = nservers;
-	id = xtask_setup(64, workers);
-	pid = getpid();
-	if(id < nservers) *am_server = 1;
+	if(id < servers) *am_server = 1;
 	else *am_server = 0;
+
+	xlb_data_types_init();
 	return ADLB_SUCCESS;
 }
 
@@ -91,7 +102,22 @@ adlb_code ADLB_Create(adlb_datum_id id, adlb_data_type type,
 }
 
 adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count) {
-	print("STUB Multicreate!\n");
+	print("Ignoring Multicreate:\n");
+	for(int i=0; i<count; i++) {
+		print("\tid=%ld, type=%d\n", specs[i].id, specs[i].type);
+		if(specs[i].type_extra.valid) {
+			if(specs[i].type == ADLB_DATA_TYPE_CONTAINER)
+				print("\t\textra: key=%d, val=%d\n",
+					specs[i].type_extra.CONTAINER.key_type,
+					specs[i].type_extra.CONTAINER.val_type);
+			if(specs[i].type == ADLB_DATA_TYPE_MULTISET)
+				print("\t\textra: val=%d\n",
+					specs[i].type_extra.MULTISET.val_type);
+			if(specs[i].type == ADLB_DATA_TYPE_STRUCT)
+				print("\t\textra: struct_type=%d\n",
+					specs[i].type_extra.STRUCT.struct_type);
+		}
+	}
 	return ADLB_SUCCESS;
 }
 
@@ -284,8 +310,23 @@ adlb_data_code ADLB_Declare_struct_type(adlb_struct_type type,
 	int field_count,
 	const adlb_struct_field_type *field_types,
 	const char **field_names) {
-	print("Ignoring declaration for struct %s\n", type_name);
-	for(int i=0; i<field_count; i++) print("\t%d: %s\n", i, field_names[i]);
+
+	if(numstructs <= type) {
+		numstructs = type+1;
+		structs = realloc(structs, numstructs*sizeof(struct dec_entry));
+	}
+
+	structs[type] = (struct dec_entry){
+		.name = strdup(type_name),
+		.count = field_count,
+		.fields = malloc(field_count*sizeof(adlb_struct_field_type)),
+		.names = malloc(field_count*sizeof(char*)),
+	};
+	for(int i=0; i<field_count; i++) {
+		structs[type].fields[i] = field_types[i];
+		structs[type].names[i] = strdup(field_names[i]);
+	}
+
 	return ADLB_DATA_SUCCESS;
 }
 
@@ -293,8 +334,14 @@ adlb_data_code ADLB_Lookup_struct_type(adlb_struct_type type,
 	const char **type_name, int *field_count,
 	const adlb_struct_field_type **field_types,
 	char const* const** field_names) {
-	print("STUB Lookup_struct_type!\n");
-	return ADLB_DATA_SUCCESS;
+
+	if(type < numstructs) {
+		if(type_name) *type_name = structs[type].name;
+		if(field_count) *field_count = structs[type].count;
+		if(field_types) *field_types = structs[type].fields;
+		if(field_names) *field_names = structs[type].names;
+		return ADLB_DATA_SUCCESS;
+	} else return ADLB_DATA_ERROR_UNKNOWN;
 }
 
 adlb_data_code ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
