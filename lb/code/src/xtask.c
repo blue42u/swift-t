@@ -19,13 +19,16 @@ struct dec_entry {
 static struct dec_entry* structs;
 static int numstructs;
 
+static int used_dids;
+
 void ADLB_Init_comm() {
-	workers = 2;	// Hardcoded for now
+	workers = 3;	// Hardcoded for now
 	id = xtask_setup(64, workers);
 	pid = getpid();
 
 	servers = 1;	// We assume one server. Hopefully it works out....
 	structs = NULL;
+	used_dids = 0;
 }
 
 adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[], int *am_server) {
@@ -75,7 +78,14 @@ adlb_code ADLB_Put(const void* payload, int length, adlb_put_opts opts) {
 adlb_code ADLB_Dput(const void* payload, int length, adlb_put_opts opts,
 	const char *name, const adlb_datum_id *wait_ids, int wait_id_count,
 	const adlb_datum_id_sub *wait_id_subs, int wait_id_sub_count) {
-	print("STUB Dput!\n");
+
+	print("Ignoring Dput, waiting on ");
+	for(int i=0; i<wait_id_count; i++) printf("%ld,", wait_ids[i]);
+	printf(" and ");
+	for(int i=0; i<wait_id_sub_count; i++)
+		printf("%ld[*],", wait_id_subs[i].id);
+	printf(".\n");
+
 	return ADLB_SUCCESS;
 }
 
@@ -104,6 +114,7 @@ adlb_code ADLB_Create(adlb_datum_id id, adlb_data_type type,
 adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count) {
 	print("Ignoring Multicreate:\n");
 	for(int i=0; i<count; i++) {
+		specs[i].id = used_dids++;
 		print("\tid=%ld, type=%d\n", specs[i].id, specs[i].type);
 		if(specs[i].type_extra.valid) {
 			if(specs[i].type == ADLB_DATA_TYPE_CONTAINER)
@@ -290,7 +301,7 @@ adlb_code ADLB_Unlock(adlb_datum_id id) {
 }
 
 adlb_code ADLB_Finalize(void) {
-	print("STUB Finalize!\n");
+	xtask_cleanup();
 	return ADLB_SUCCESS;
 }
 
