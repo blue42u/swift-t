@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "adlb.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 #define BACKEND_xtask
 
@@ -13,6 +14,10 @@ static MPI_Comm work_comm;
 static int id, servers, workers;
 #endif
 
+static pid_t pid;
+
+#define print(fmt, ...) printf("[%d] " fmt, pid, ## __VA_ARGS__)
+
 void ADLB_Init_comm() {
 #if defined BACKEND_adlb
 	int argc = 0;
@@ -20,6 +25,7 @@ void ADLB_Init_comm() {
 	MPI_Init(&argc, &argv);
 	//assert(rc == MPI_SUCCESS);	// Just hope it works...
 	MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+	pid = getpid();
 #elif defined BACKEND_xtask
 	workers = 2;	// Hardcoded for now
 	servers = 0;
@@ -34,8 +40,8 @@ adlb_code ADLB_Init(int nservers, int ntypes, int type_vect[], int *am_server) {
 #elif defined BACKEND_xtask
 	// Servers are workers with a low enough id.
 	servers = nservers;
-	printf("Servers: %d\n", servers);
 	id = xtask_setup(64, workers);
+	pid = getpid();
 	if(id < nservers) *am_server = 1;
 	else *am_server = 0;
 	return ADLB_SUCCESS;
@@ -46,7 +52,8 @@ adlb_code ADLB_Server(long max_memory) {
 #if defined BACKEND_adlb
 	return ADLBX_Server(max_memory);
 #elif defined BACKEND_xtask
-	printf("STUB Server!\n");
+	print("STUB Server!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -67,7 +74,7 @@ int ADLB_Get_rank() {
 	MPI_Comm_rank(comm, &out);
 	return out;
 #elif defined BACKEND_xtask
-	printf("Get_rank: %d %d\n", id, id-servers);
+	print("Get_rank: %d %d\n", id, id-servers);
 	return id - servers;
 #endif
 }
@@ -96,7 +103,8 @@ int ADLB_Is_leader() {
 #if defined BACKEND_adlb
 	return ADLBX_GetComm_leaders() != MPI_COMM_NULL;
 #elif defined BACKEND_xtask
-	printf("STUB Is_leader!\n");
+	print("STUB Is_leader!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -104,7 +112,8 @@ adlb_code ADLB_Put(const void* payload, int length, adlb_put_opts opts) {
 #if defined BACKEND_adlb
 	return ADLBX_Put(payload, length, ADLB_RANK_ANY, ADLB_RANK_NULL, 0, opts);
 #elif defined BACKEND_xtask
-	printf("STUB Put!\n");
+	print("STUB Put!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -116,7 +125,8 @@ adlb_code ADLB_Dput(const void* payload, int length, adlb_put_opts opts,
 		0, opts, name, wait_ids, wait_id_count, wait_id_subs,
 		wait_id_sub_count);
 #elif defined BACKEND_xtask
-	printf("STUB Dput!\n");
+	print("STUB Dput!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -127,7 +137,8 @@ adlb_code ADLB_Get(void** payload, int* length, int max_length) {
 	return ADLBX_Get(0, payload, length, max_length,
 		&a, &t, &tmp);
 #elif defined BACKEND_xtask
-	printf("STUB Get!\n");
+	print("STUB Get!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -138,7 +149,8 @@ adlb_code ADLB_Iget(void* payload, int* length) {
 	return ADLBX_Iget(0, payload, length, &a,
 		&t, &tmp);
 #elif defined BACKEND_xtask
-	printf("STUB Iget!\n");
+	print("STUB Iget!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -146,7 +158,8 @@ int ADLB_Locate(adlb_datum_id id) {
 #if defined BACKEND_adlb
 	return ADLBX_Locate(id);
 #elif defined BACKEND_xtask
-	printf("STUB Locate!\n");
+	print("STUB Locate!\n");
+	return 0;
 #endif
 }
 
@@ -156,7 +169,8 @@ adlb_code ADLB_Create(adlb_datum_id id, adlb_data_type type,
 #if defined BACKEND_adlb
 	return ADLBX_Create(id, type, type_extra, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create!\n");
+	print("STUB Create!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -164,7 +178,8 @@ adlb_code ADLB_Multicreate(ADLB_create_spec *specs, int count) {
 #if defined BACKEND_adlb
 	return ADLBX_Multicreate(specs, count);
 #elif defined BACKEND_xtask
-	printf("STUB Multicreate!\n");
+	print("STUB Multicreate!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -174,7 +189,8 @@ adlb_code ADLB_Create_integer(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_integer(id, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_integer!\n");
+	print("STUB Create_integer!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -183,7 +199,8 @@ adlb_code ADLB_Create_float(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_float(id, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_float!\n");
+	print("STUB Create_float!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -192,7 +209,8 @@ adlb_code ADLB_Create_string(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_string(id, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_string!\n");
+	print("STUB Create_string!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -201,7 +219,8 @@ adlb_code ADLB_Create_blob(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_blob(id, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_blob!\n");
+	print("STUB Create_blob!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -210,7 +229,8 @@ adlb_code ADLB_Create_ref(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_ref(id, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_ref!\n");
+	print("STUB Create_ref!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -219,7 +239,8 @@ adlb_code ADLB_Create_struct(adlb_datum_id id, adlb_create_props props,
 #if defined BACKEND_adlb
 	return ADLBX_Create_struct(id, props, struct_type, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_struct!\n");
+	print("STUB Create_struct!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -231,7 +252,8 @@ adlb_code ADLB_Create_container(adlb_datum_id id,
 #if defined BACKEND_adlb
 	return ADLBX_Create_container(id, key_type, val_type, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_container!\n");
+	print("STUB Create_container!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -242,7 +264,8 @@ adlb_code ADLB_Create_multiset(adlb_datum_id id,
 #if defined BACKEND_adlb
 	return ADLBX_Create_multiset(id, val_type, props, new_id);
 #elif defined BACKEND_xtask
-	printf("STUB Create_multiset!\n");
+	print("STUB Create_multiset!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -250,7 +273,8 @@ adlb_code ADLB_Add_dsym(adlb_dsym symbol, adlb_dsym_data data) {
 #if defined BACKEND_adlb
 	return ADLBX_Add_dsym(symbol, data);
 #elif defined BACKEND_xtask
-	printf("STUB Add_dsym!\n");
+	print("STUB Add_dsym!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -258,7 +282,8 @@ adlb_dsym_data ADLB_Dsym(adlb_dsym symbol) {
 #if defined BACKEND_adlb
 	return ADLBX_Dsym(symbol);
 #elif defined BACKEND_xtask
-	printf("STUB Dsym!\n");
+	print("STUB Dsym!\n");
+	return (adlb_dsym_data){"STUB", "stub"};
 #endif
 }
 
@@ -267,7 +292,8 @@ adlb_code ADLB_Exists(adlb_datum_id id, adlb_subscript subscript, bool* result,
 #if defined BACKEND_adlb
 	return ADLBX_Exists(id, subscript, result, decr);
 #elif defined BACKEND_xtask
-	printf("STUB Exists!\n");
+	print("STUB Exists!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -276,7 +302,8 @@ adlb_code ADLB_Refcount_get(adlb_datum_id id, adlb_refc *result,
 #if defined BACKEND_adlb
 	return ADLBX_Refcount_get(id, result, decr);
 #elif defined BACKEND_xtask
-	printf("STUB Refcount_get!\n");
+	print("STUB Refcount_get!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -287,7 +314,8 @@ adlb_code ADLB_Store(adlb_datum_id id, adlb_subscript subscript,
 	return ADLBX_Store(id, subscript, type, data, length, refcount_decr,
 		store_refcounts);
 #elif defined BACKEND_xtask
-	printf("STUB Store!\n");
+	print("STUB Store!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -297,7 +325,8 @@ adlb_code ADLB_Retrieve(adlb_datum_id id, adlb_subscript subscript,
 #if defined BACKEND_adlb
 	return ADLBX_Retrieve(id, subscript, refcounts, type, data, length);
 #elif defined BACKEND_xtask
-	printf("STUB Retrieve!\n");
+	print("STUB Retrieve!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -310,7 +339,8 @@ adlb_code ADLB_Enumerate(adlb_datum_id container_id,
 	return ADLBX_Enumerate(container_id, count, offset, decr, include_keys,
 		include_vals, data, length, records, kv_type);
 #elif defined BACKEND_xtask
-	printf("STUB Enumerate!\n");
+	print("STUB Enumerate!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -318,7 +348,7 @@ adlb_code ADLB_Read_refcount_enable(void) {
 #if defined BACKEND_adlb
 	return ADLBX_Read_refcount_enable();
 #elif defined BACKEND_xtask
-	printf("Read refcount enabled. Or more like ignored.\n");
+	print("STUB Read_refcount_enable!\n");
 	return ADLB_SUCCESS;
 #endif
 }
@@ -327,7 +357,8 @@ adlb_code ADLB_Refcount_incr(adlb_datum_id id, adlb_refc change) {
 #if defined BACKEND_adlb
 	return ADLBX_Refcount_incr(id, change);
 #elif defined BACKEND_xtask
-	printf("STUB Refcount_incr!\n");
+	print("STUB Refcount_incr!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -339,7 +370,8 @@ adlb_code ADLB_Insert_atomic(adlb_datum_id id, adlb_subscript subscript,
 	return ADLBX_Insert_atomic(id, subscript, refcounts, result,
 		value_present, data, length, type);
 #elif defined BACKEND_xtask
-	printf("STUB Insert_atomic!\n");
+	print("STUB Insert_atomic!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -348,7 +380,8 @@ adlb_code ADLB_Subscribe(adlb_datum_id id, adlb_subscript subscript,
 #if defined BACKEND_adlb
 	return ADLBX_Subscribe(id, subscript, work_type, subscribed);
 #elif defined BACKEND_xtask
-	printf("STUB Subscribe!\n");
+	print("STUB Subscribe!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -360,7 +393,8 @@ adlb_code ADLB_Container_reference(adlb_datum_id id, adlb_subscript subscript,
 	return ADLBX_Container_reference(id, subscript, ref_id, ref_subscript,
 		ref_type, transfer_refs, ref_write_decr);
 #elif defined BACKEND_xtask
-	printf("STUB Container_reference!\n");
+	print("STUB Container_reference!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -368,7 +402,8 @@ adlb_code ADLB_Unique(adlb_datum_id *result) {
 #if defined BACKEND_adlb
 	return ADLBX_Unique(result);
 #elif defined BACKEND_xtask
-	printf("STUB Unique!\n");
+	print("STUB Unique!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -376,7 +411,8 @@ adlb_code ADLB_Alloc_global(int count, adlb_datum_id *start) {
 #if defined BACKEND_adlb
 	return ADLBX_Alloc_global(count, start);
 #elif defined BACKEND_xtask
-	printf("STUB Alloc_global!\n");
+	print("STUB Alloc_global!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -384,7 +420,8 @@ adlb_code ADLB_Typeof(adlb_datum_id id, adlb_data_type* type) {
 #if defined BACKEND_adlb
 	return ADLBX_Typeof(id, type);
 #elif defined BACKEND_xtask
-	printf("STUB Typeof!\n");
+	print("STUB Typeof!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -393,7 +430,8 @@ adlb_code ADLB_Container_typeof(adlb_datum_id id, adlb_data_type* key_type,
 #if defined BACKEND_adlb
 	return ADLBX_Container_typeof(id, key_type, val_type);
 #elif defined BACKEND_xtask
-	printf("STUB Container_typeof!\n");
+	print("STUB Container_typeof!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -402,7 +440,8 @@ adlb_code ADLB_Container_size(adlb_datum_id container_id, int* size,
 #if defined BACKEND_adlb
 	return ADLBX_Container_size(container_id, size, decr);
 #elif defined BACKEND_xtask
-	printf("STUB Container_size!\n");
+	print("STUB Container_size!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -410,7 +449,8 @@ adlb_code ADLB_Lock(adlb_datum_id id, bool* result) {
 #if defined BACKEND_adlb
 	return ADLBX_Lock(id, result);
 #elif defined BACKEND_xtask
-	printf("STUB Lock!\n");
+	print("STUB Lock!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -418,7 +458,8 @@ adlb_code ADLB_Unlock(adlb_datum_id id) {
 #if defined BACKEND_adlb
 	return ADLBX_Unlock(id);
 #elif defined BACKEND_xtask
-	printf("STUB Unlock!\n");
+	print("STUB Unlock!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -429,7 +470,8 @@ adlb_code ADLB_Finalize(void) {
 	MPI_Finalize();
 	return o;
 #elif defined BACKEND_xtask
-	printf("STUB Finalize!\n");
+	print("STUB Finalize!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -437,7 +479,8 @@ adlb_code ADLB_Fail(int code) {
 #if defined BACKEND_adlb
 	return ADLBX_Fail(code);
 #elif defined BACKEND_xtask
-	printf("STUB Fail!\n");
+	print("STUB Fail!\n");
+	return ADLB_SUCCESS;
 #endif
 }
 
@@ -445,7 +488,7 @@ void ADLB_Abort(int code) {
 #if defined BACKEND_adlb
 	ADLBX_Abort(code);
 #elif defined BACKEND_xtask
-	printf("STUB Abort!\n");
+	print("STUB Abort!\n");
 #endif
 }
 
@@ -465,8 +508,8 @@ adlb_data_code ADLB_Declare_struct_type(adlb_struct_type type,
 	return ADLBX_Declare_struct_type(type, type_name, field_count,
 		field_types, field_names);
 #elif defined BACKEND_xtask
-	printf("Ignoring declaration for struct %s\n", type_name);
-	for(int i=0; i<field_count; i++) printf("\t%d: %s\n", i, field_names[i]);
+	print("Ignoring declaration for struct %s\n", type_name);
+	for(int i=0; i<field_count; i++) print("\t%d: %s\n", i, field_names[i]);
 	return ADLB_DATA_SUCCESS;
 #endif
 }
@@ -478,7 +521,8 @@ adlb_data_code ADLB_Lookup_struct_type(adlb_struct_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Lookup_struct_type!\n");
+	print("STUB Lookup_struct_type!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -488,7 +532,8 @@ adlb_data_code ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack!\n");
+	print("STUB Pack!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -498,7 +543,8 @@ adlb_data_code ADLB_Append_buffer(adlb_data_type type, const void *data,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Append_buffer!\n");
+	print("STUB Append_buffer!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -508,7 +554,8 @@ adlb_data_code ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_buffer!\n");
+	print("STUB Pack_buffer!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -516,7 +563,8 @@ bool ADLB_pack_pad_size(adlb_data_type type) {
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB pack_pad_size!\n");
+	print("STUB pack_pad_size!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -525,7 +573,8 @@ adlb_data_code ADLB_Unpack(adlb_datum_storage *d, adlb_data_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack!\n");
+	print("STUB Unpack!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -535,7 +584,8 @@ adlb_data_code ADLB_Unpack2(adlb_datum_storage *d, adlb_data_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack2!\n");
+	print("STUB Unpack2!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -545,7 +595,8 @@ adlb_data_code ADLB_Unpack_buffer(adlb_data_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_buffer!\n");
+	print("STUB Unpack_buffer!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -554,7 +605,8 @@ adlb_data_code ADLB_Init_compound(adlb_datum_storage *d, adlb_data_type type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Init_compound!\n");
+	print("STUB Init_compound!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -564,7 +616,8 @@ adlb_data_code ADLB_Pack_container(const adlb_container *container,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_container!\n");
+	print("STUB Pack_container!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -574,7 +627,8 @@ adlb_data_code ADLB_Pack_container_hdr(int elems, adlb_data_type key_type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_container_hdr!\n");
+	print("STUB Pack_container_hdr!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -583,7 +637,8 @@ adlb_data_code ADLB_Unpack_container(adlb_container *container, const void *data
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_container!\n");
+	print("STUB Unpack_container!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -593,7 +648,8 @@ adlb_data_code ADLB_Unpack_container_hdr(const void *data, size_t length,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_container_hdr!\n");
+	print("STUB Unpack_container_hdr!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -604,7 +660,8 @@ adlb_data_code ADLB_Unpack_container_entry(adlb_data_type key_type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_container_entry!\n");
+	print("STUB Unpack_container_entry!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -614,7 +671,8 @@ adlb_data_code ADLB_Pack_multiset(const adlb_multiset_ptr ms,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_multiset!\n");
+	print("STUB Pack_multiset!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -623,7 +681,8 @@ adlb_data_code ADLB_Pack_multiset_hdr(int elems, adlb_data_type elem_type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_multiset_hdr!\n");
+	print("STUB Pack_multiset_hdr!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -632,7 +691,8 @@ adlb_data_code ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_multiset!\n");
+	print("STUB Unpack_multiset!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -641,7 +701,8 @@ adlb_data_code ADLB_Unpack_multiset_hdr(const void *data, size_t length,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_multiset_hdr!\n");
+	print("STUB Unpack_multiset_hdr!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -651,7 +712,8 @@ adlb_data_code ADLB_Unpack_multiset_entry(adlb_data_type elem_type,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_multiset_entry!\n");
+	print("STUB Unpack_multiset_entry!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -660,7 +722,8 @@ adlb_data_code ADLB_Pack_struct(const adlb_struct *s,
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Pack_struct!\n");
+	print("STUB Pack_struct!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -669,7 +732,8 @@ adlb_data_code ADLB_Unpack_struct(adlb_struct **s, const void *data, size_t leng
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Unpack_struct!\n");
+	print("STUB Unpack_struct!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -677,7 +741,8 @@ adlb_data_code ADLB_Free_storage(adlb_datum_storage *d, adlb_data_type type) {
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Free_storage!\n");
+	print("STUB Free_storage!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -685,7 +750,8 @@ adlb_data_code ADLB_Int64_parse(const char *str, size_t length, int64_t *result)
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Int64_parse!\n");
+	print("STUB Int64_parse!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
 
@@ -693,6 +759,7 @@ char* ADLB_Data_repr(const adlb_datum_storage *d, adlb_data_type type) {
 #if defined BACKEND_adlb
 	return
 #elif defined BACKEND_xtask
-	printf("STUB Data_repr!\n");
+	print("STUB Data_repr!\n");
+	return ADLB_DATA_SUCCESS;
 #endif
 }
