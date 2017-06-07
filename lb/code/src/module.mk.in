@@ -2,7 +2,16 @@
 
 DIR := src
 
-SRCS += $(shell find $(DIR) -name "*.c" )
+SRCS += src/data_structs.c src/steal.c src/multiset.c src/adlb_types.c \
+	src/messaging.c src/refcount.c src/layout.c src/engine.c src/backoffs.c \
+	src/sync.c src/workqueue.c src/xpt_file.c src/mpe-tools.c src/handlers.c \
+	src/common.c src/xpt_index.c src/notifications.c src/data.c \
+	src/adlb_prof.c src/location.c src/data_cleanup.c src/server.c \
+	src/requestqueue.c src/adlb-xpt.c src/adlb.c src/mpi-tools.c \
+	src/helpers.c src/debug.c src/debug_symbols.c
+SRCS += src/xtask.c
+#SRCS += src/adlb-wrapper.c
+
 OBJS += $(patsubst %.c, %.o, $(SRCS))
 DEPS += $(patsubst %.c, %.d, $(SRCS))
 

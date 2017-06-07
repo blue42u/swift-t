@@ -269,128 +269,141 @@ adlb_data_code ADLB_Lookup_struct_type(adlb_struct_type type,
 	const char **type_name, int *field_count,
 	const adlb_struct_field_type **field_types,
 	char const* const** field_names) {
-	return
+	return ADLBX_Lookup_struct_type(type, type_name, field_count, field_types,
+		field_names);
 }
 
 adlb_data_code ADLB_Pack(const adlb_datum_storage *d, adlb_data_type type,
 	const adlb_buffer *caller_buffer,
 	adlb_binary_data *result) {
-	return
+	return ADLBX_Pack(d, type, caller_buffer, result);
 }
 
 adlb_data_code ADLB_Append_buffer(adlb_data_type type, const void *data,
 	size_t length, bool prefix_len, adlb_buffer *output,
 	bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Append_buffer(type, data, length, prefix_len, output,
+		output_caller_buffer, output_pos);
 }
 
 adlb_data_code ADLB_Pack_buffer(const adlb_datum_storage *d, adlb_data_type type,
 	bool prefix_len, const adlb_buffer *tmp_buf, adlb_buffer *output,
 	bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Pack_buffer(d, type, prefix_len, tmp_buf, output,
+		output_caller_buffer, output_pos);
 }
 
 bool ADLB_pack_pad_size(adlb_data_type type) {
-	return
+	return ADLBX_pack_pad_size(type);
 }
 
 adlb_data_code ADLB_Unpack(adlb_datum_storage *d, adlb_data_type type,
 	const void *buffer, size_t length, adlb_refc refcounts) {
-	return
+	return ADLBX_Unpack(d, type, buffer, length, refcounts);
 }
 
 adlb_data_code ADLB_Unpack2(adlb_datum_storage *d, adlb_data_type type,
 	void *buffer, size_t length, bool copy_buffer,
 	adlb_refc refcounts, bool init_compound, bool *took_ownership) {
-	return
+	return ADLBX_Unpack2(d, type, buffer, length, copy_buffer,
+		refcounts, init_compound, took_ownership);
 }
 
 adlb_data_code ADLB_Unpack_buffer(adlb_data_type type,
 	const void *buffer, size_t length, size_t *pos,
 	const void **entry, size_t* entry_length) {
-	return
+	return ADLBX_Unpack_buffer(type, buffer, length, pos, entry,
+		entry_length);
 }
 
 adlb_data_code ADLB_Init_compound(adlb_datum_storage *d, adlb_data_type type,
 	adlb_type_extra type_extra, bool must_init) {
-	return
+	return ADLBX_Init_compound(d, type, type_extra, must_init);
 }
 
 adlb_data_code ADLB_Pack_container(const adlb_container *container,
 	const adlb_buffer *tmp_buf, adlb_buffer *output,
 	bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Pack_container(container, tmp_buf, output,
+		output_caller_buffer, output_pos);
 }
 
 adlb_data_code ADLB_Pack_container_hdr(int elems, adlb_data_type key_type,
 	adlb_data_type val_type, adlb_buffer *output,
 	bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Pack_container_hdr(elems, key_type, val_type, output,
+		output_caller_buffer, output_pos);
 }
 
 adlb_data_code ADLB_Unpack_container(adlb_container *container, const void *data,
 	size_t length, adlb_refc refcounts, bool init_cont) {
-	return
+	return ADLBX_Unpack_container(container, data, length, refcounts,
+		init_cont);
 }
 
 adlb_data_code ADLB_Unpack_container_hdr(const void *data, size_t length,
 	size_t *pos, int *entries, adlb_data_type *key_type,
 	adlb_data_type *val_type) {
-	return
+	return ADLBX_Unpack_container_hdr(data, length, pos, entries, key_type,
+		val_type);
 }
 
 adlb_data_code ADLB_Unpack_container_entry(adlb_data_type key_type,
 	adlb_data_type val_type, const void *data, size_t length,
 	size_t *pos, const void **key, size_t *key_len,
 	const void **val, size_t *val_len) {
-	return
+	return ADLBX_Unpack_container_entry(key_type, val_type, data, length,
+		pos, key, key_len, val, val_len);
 }
 
 adlb_data_code ADLB_Pack_multiset(const adlb_multiset_ptr ms,
 	const adlb_buffer *tmp_buf, adlb_buffer *output,
 	bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Pack_multiset(ms, tmp_buf, output, output_caller_buffer,
+		output_pos);
 }
 
 adlb_data_code ADLB_Pack_multiset_hdr(int elems, adlb_data_type elem_type,
 	adlb_buffer *output, bool *output_caller_buffer, size_t *output_pos) {
-	return
+	return ADLBX_Pack_multiset_hdr(elems, elem_type, output,
+		output_caller_buffer, output_pos);
 }
 
 adlb_data_code ADLB_Unpack_multiset(adlb_multiset_ptr *ms, const void *data,
 	size_t length, adlb_refc refcounts, bool init_ms) {
-	return
+	return ADLBX_Unpack_multiset(ms, data, length, refcounts, init_ms);
 }
 
 adlb_data_code ADLB_Unpack_multiset_hdr(const void *data, size_t length,
 	size_t *pos, int *entries, adlb_data_type *elem_type) {
-	return
+	return ADLBX_Unpack_multiset_hdr(data, length, pos, entries, elem_type);
 }
 
 adlb_data_code ADLB_Unpack_multiset_entry(adlb_data_type elem_type,
 	const void *data, size_t length, size_t *pos,
 	const void **elem, size_t *elem_len) {
-	return
+	return ADLBX_Unpack_multiset_entry(elem_type, data, length, pos, elem,
+		elem_len);
 }
 
 adlb_data_code ADLB_Pack_struct(const adlb_struct *s,
 	const adlb_buffer *caller_buffer, adlb_binary_data *result) {
-	return
+	return ADLBX_Pack_struct(s, caller_buffer, result);
 }
 
 adlb_data_code ADLB_Unpack_struct(adlb_struct **s, const void *data, size_t length,
 	adlb_refc refcounts, bool init_struct) {
-	return
+	return ADLBX_Unpack_struct(s, data, length, refcounts, init_struct);
 }
 
 adlb_data_code ADLB_Free_storage(adlb_datum_storage *d, adlb_data_type type) {
-	return
+	return ADLBX_Free_storage(d, type);
 }
 
 adlb_data_code ADLB_Int64_parse(const char *str, size_t length, int64_t *result) {
-	return
+	return ADLBX_Int64_parse(str, length, result);
 }
 
 char* ADLB_Data_repr(const adlb_datum_storage *d, adlb_data_type type) {
-	return
+	return ADLBX_Data_repr(d, type);
 }
