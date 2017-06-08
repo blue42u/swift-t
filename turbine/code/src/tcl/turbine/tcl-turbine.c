@@ -464,7 +464,7 @@ rule_set_name_default(char* name, int size, const char* action)
   }
 }
 
-static int
+/*static int
 Turbine_RuleOpts_Cmd(ClientData cdata, Tcl_Interp* interp,
                      int objc, Tcl_Obj *const objv[])
 {
@@ -478,7 +478,7 @@ Turbine_RuleOpts_Cmd(ClientData cdata, Tcl_Interp* interp,
   rule_opts_from_list(interp, objv, &opts, objv + 1, objc - 1,
                       t, name_buf_size, action);
   return TCL_OK;
-}
+}*/
 
 static inline int
 rule_opt_from_kv(Tcl_Interp* interp, Tcl_Obj *const objv[],
@@ -648,7 +648,7 @@ Turbine_Cache_Check_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
+/*static int
 Turbine_Cache_Retrieve_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -675,7 +675,7 @@ Turbine_Cache_Retrieve_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CHECK(tcl_code);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 static int
 turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
@@ -854,7 +854,7 @@ worker_keyword_args(Tcl_Interp *interp, Tcl_Obj *const objv[],
   return TCL_OK;
 }
 
-int
+/*int
 Turbine_TaskComm_Cmd(ClientData cdata, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[])
 {
@@ -862,7 +862,7 @@ Turbine_TaskComm_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewLongObj(turbine_task_comm);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 static int
 Turbine_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -872,7 +872,7 @@ Turbine_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
+/*static int
 Turbine_Debug_On_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
@@ -880,7 +880,7 @@ Turbine_Debug_On_Cmd(ClientData cdata, Tcl_Interp *interp,
   bool enabled = turbine_debug_enabled;
   Tcl_SetObjResult(interp, Tcl_NewIntObj(enabled));
   return TCL_OK;
-}
+}*/
 
 static int
 Turbine_Debug_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -900,14 +900,14 @@ Turbine_Debug_Cmd(ClientData cdata, Tcl_Interp *interp,
   turbine::toint_impl <string>
   Convert decimal string to wide integer
  */
-static int
+/*static int
 Turbine_ToIntImpl_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   TCL_ARGS(2);
 
   return Turbine_ParseInt_Impl(cdata, interp, objv, objv[1], 10);
-}
+}*/
 
 /*
   turbine::parse_int_impl <string> <base>
@@ -999,7 +999,7 @@ Turbine_ParseInt_Impl(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static void
+/*static void
 redirect_error_exit(const char *file, const char *purpose)
 {
   fprintf(stderr, "error opening %s for %s: %s\n", file, purpose,
@@ -1021,9 +1021,9 @@ close_error_exit(const char *purpose)
   fprintf(stderr, "error closing file for %s: %s\n", purpose,
           strerror(errno));
   exit(1);
-}
+}*/
 
-static int
+/*static int
 Sync_Exec_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
@@ -1115,7 +1115,7 @@ Sync_Exec_Cmd(ClientData cdata, Tcl_Interp *interp,
   }
 
   return TCL_OK;
-}
+}*/
 
 /*
   Extract IDs and ID/Sub pairs
@@ -1275,7 +1275,7 @@ Async_Exec_Names_Cmd(ClientData cdata, Tcl_Interp* interp,
 /* usage: async_exec_configure <executor name> <config string>
    Configure registered executor.
  */
-static int
+/*static int
 Async_Exec_Configure_Cmd(ClientData cdata, Tcl_Interp* interp,
                         int objc, Tcl_Obj* const objv[])
 {
@@ -1295,7 +1295,7 @@ Async_Exec_Configure_Cmd(ClientData cdata, Tcl_Interp* interp,
       "Could not configure executor %s", exec_name);
 
   return TCL_OK;
-}
+}*/
 
 /*
   turbine::async_exec_worker_loop <executor name> <adlb work type>
@@ -1305,7 +1305,7 @@ Async_Exec_Configure_Cmd(ClientData cdata, Tcl_Interp* interp,
     buffer_size: size of payload buffers in bytes (must be large enough
                                                    for work units)
  */
-static int
+/*static int
 Async_Exec_Worker_Loop_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
@@ -1397,13 +1397,13 @@ cleanup:
   }
 
   return rc;
-}
+}*/
 
 /*
   turbine::noop_exec_run <work string> [<success callback>]
                          [<failure callback>]
  */
-static int
+/*static int
 Noop_Exec_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
@@ -1438,7 +1438,7 @@ Noop_Exec_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CONDITION(tc == TURBINE_SUCCESS, "Error executing noop task");
 
   return TCL_OK;
-}
+}*/
 
 /*
   turbine::coaster_run <executable> <argument list> <infiles>
@@ -1451,7 +1451,7 @@ Noop_Exec_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
     staging_mode: staging mode to use
               ("always", "if_present", "on_error", "on_success")
  */
-static int
+/*static int
 Coaster_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
@@ -1554,7 +1554,7 @@ Coaster_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   return TCL_OK;
 #endif
-}
+}*/
 
 int turbine_tcllist_to_strings(Tcl_Interp *interp, Tcl_Obj *const objv[],
       Tcl_Obj *list, int *count, const char ***strs, size_t **str_lens)
@@ -1697,7 +1697,7 @@ static int parse_coaster_opts(Tcl_Interp *interp, Tcl_Obj *const objv[],
 }
 #endif
 
-static int
+/*static int
 Turbine_CopyTo_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -1713,9 +1713,9 @@ Turbine_CopyTo_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CONDITION(result, "Could not copy: %s to %s",
                 name_in, name_out);
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 Turbine_Bcast_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
@@ -1746,7 +1746,7 @@ Turbine_Bcast_Cmd(ClientData cdata, Tcl_Interp *interp,
   if (rank != root)
     Tcl_SetVar(interp, name, s, EMPTY_FLAG);
   return TCL_OK;
-}
+}*/
 
 /**
    Called when Tcl loads this extension
@@ -1760,47 +1760,47 @@ Tclturbine_Init(Tcl_Interp* interp)
   if (Tcl_PkgProvide(interp, "turbine", TURBINE_VERSION) == TCL_ERROR)
     return TCL_ERROR;
 
-  tcl_c_utils_init(interp);
+  // tcl_c_utils_init(interp);
   tcl_adlb_init(interp);
-  tcl_jvm_init(interp);
-  tcl_mpe_init(interp);
-  tcl_julia_init(interp);
-  tcl_python_init(interp);
-  tcl_r_init(interp);
-  Blob_Init(interp);
+  // tcl_jvm_init(interp);
+  // tcl_mpe_init(interp);
+  // tcl_julia_init(interp);
+  // tcl_python_init(interp);
+  // tcl_r_init(interp);
+  // Blob_Init(interp);
 
   COMMAND("init",        Turbine_Init_Cmd);
   COMMAND("init_debug",  Turbine_Init_Debug_Cmd);
   COMMAND("version",     Turbine_Version_Cmd);
   COMMAND("rule",        Turbine_Rule_Cmd);
-  COMMAND("ruleopts",    Turbine_RuleOpts_Cmd);
+  // COMMAND("ruleopts",    Turbine_RuleOpts_Cmd);
   COMMAND("log",         Turbine_Log_Cmd);
   COMMAND("normalize",   Turbine_Normalize_Cmd);
   COMMAND("worker_loop", Turbine_Worker_Loop_Cmd);
   COMMAND("cache_check", Turbine_Cache_Check_Cmd);
-  COMMAND("cache_retrieve", Turbine_Cache_Retrieve_Cmd);
+  // COMMAND("cache_retrieve", Turbine_Cache_Retrieve_Cmd);
   COMMAND("cache_store", Turbine_Cache_Store_Cmd);
-  COMMAND("task_comm",   Turbine_TaskComm_Cmd);
+  // COMMAND("task_comm",   Turbine_TaskComm_Cmd);
   COMMAND("finalize",    Turbine_Finalize_Cmd);
-  COMMAND("debug_on",    Turbine_Debug_On_Cmd);
+  // COMMAND("debug_on",    Turbine_Debug_On_Cmd);
   COMMAND("debug",       Turbine_Debug_Cmd);
-  COMMAND("toint_impl", Turbine_ToIntImpl_Cmd);
+  // COMMAND("toint_impl", Turbine_ToIntImpl_Cmd);
   COMMAND("parse_int_impl", Turbine_ParseIntImpl_Cmd);
 
-  COMMAND("sync_exec", Sync_Exec_Cmd);
+  // COMMAND("sync_exec", Sync_Exec_Cmd);
 
   COMMAND("async_exec_names", Async_Exec_Names_Cmd);
-  COMMAND("async_exec_configure", Async_Exec_Configure_Cmd);
-  COMMAND("async_exec_worker_loop", Async_Exec_Worker_Loop_Cmd);
+  // COMMAND("async_exec_configure", Async_Exec_Configure_Cmd);
+  // COMMAND("async_exec_worker_loop", Async_Exec_Worker_Loop_Cmd);
 
   COMMAND("noop_exec_register", Noop_Exec_Register_Cmd);
-  COMMAND("noop_exec_run", Noop_Exec_Run_Cmd);
+  // COMMAND("noop_exec_run", Noop_Exec_Run_Cmd);
 
   COMMAND("coaster_register", Coaster_Register_Cmd);
-  COMMAND("coaster_run", Coaster_Run_Cmd);
+  // COMMAND("coaster_run", Coaster_Run_Cmd);
 
-  COMMAND("bcast",   Turbine_Bcast_Cmd);
-  COMMAND("copy_to", Turbine_CopyTo_Cmd);
+  // COMMAND("bcast",   Turbine_Bcast_Cmd);
+  // COMMAND("copy_to", Turbine_CopyTo_Cmd);
 
   Tcl_Namespace* turbine =
     Tcl_FindNamespace(interp, "::turbine::c", NULL, 0);

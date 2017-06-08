@@ -176,8 +176,8 @@ static int adlb_setup_comm(Tcl_Interp *interp, Tcl_Obj *const objv[],
                            MPI_Comm *comm);
 static void set_namespace_constants(Tcl_Interp* interp);
 
-static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
-                          Tcl_Obj* obj, adlb_refcount_type *mode);
+/*static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
+                          Tcl_Obj* obj, adlb_refcount_type *mode);*/
 
 static int blob_cache_key(Tcl_Interp *interp, Tcl_Obj *const objv[],
                           adlb_datum_id *id, adlb_subscript *sub,
@@ -192,9 +192,9 @@ static int cache_blob(Tcl_Interp *interp, int objc,
     Tcl_Obj *const objv[], adlb_datum_id id, adlb_subscript sub,
     void *blob);
 
-static int uncache_blob(Tcl_Interp *interp, int objc,
+/*static int uncache_blob(Tcl_Interp *interp, int objc,
     Tcl_Obj *const objv[], adlb_datum_id id, adlb_subscript sub,
-    bool *found_in_cache);
+    bool *found_in_cache);*/
 
 static int blob_cache_finalize(void);
 
@@ -334,10 +334,11 @@ static int
 ADLB_Retrieve_Impl(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[], bool decr);
 
-static int
+
+/*static int
 ADLB_Acquire_Ref_Impl(ClientData cdata, Tcl_Interp *interp,
           int objc, Tcl_Obj *const objv[], bool write_ref,
-          adlb_subscript_kind sub_kind);
+          adlb_subscript_kind sub_kind);*/
 
 /**
    usage: adlb::init_comm [<comm>]?
@@ -556,7 +557,7 @@ ADLB_Declare_Struct_Type_Cmd(ClientData cdata, Tcl_Interp *interp,
            0 if another valid ADLB type
     Raises error if type name is invalid.
  */
-static int
+/*static int
 ADLB_Is_Struct_Type_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
@@ -572,7 +573,7 @@ ADLB_Is_Struct_Type_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
   return TCL_OK;
-}
+}*/
 
 static int field_name_objs_init(Tcl_Interp *interp, Tcl_Obj *const objv[])
 {
@@ -699,7 +700,7 @@ ADLB_Server_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
+/*static int
 ADLB_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
@@ -713,7 +714,7 @@ ADLB_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
   rc = MPI_Barrier(comm);
   ASSERT(rc == MPI_SUCCESS);
   return TCL_OK;
-}
+}*/
 
 /*
  * adlb::worker_barrier
@@ -721,7 +722,7 @@ ADLB_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
  * Should only be called by workers (i.e. non-adlb servers) and
  * must be called by all workers.
  */
-static int
+/*static int
 ADLB_Worker_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
@@ -731,7 +732,7 @@ ADLB_Worker_Barrier_Cmd(ClientData cdata, Tcl_Interp *interp,
   rc = MPI_Barrier(ADLB_GetComm_workers());
   ASSERT(rc == MPI_SUCCESS);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: returns MPI rank in given comm or, by default, adlb_comm
@@ -761,7 +762,7 @@ ADLB_CommRank_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int
+/*static int
 ADLB_CommSize_Cmd(ClientData cdata, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[])
 {
@@ -776,7 +777,7 @@ ADLB_CommSize_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewIntObj(size);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 static int
 ADLB_CommGet_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -806,14 +807,14 @@ ADLB_CommGet_Cmd(ClientData cdata, Tcl_Interp *interp,
 /**
    usage: no args, returns rank within workers
 */
-static int
+/*static int
 ADLB_Worker_Rank_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(adlb_init, "ADLB not initialized");
   Tcl_SetObjResult(interp, Tcl_NewIntObj(adlb_worker_comm_rank));
   return TCL_OK;
-}
+}*/
 
 /**
    usage: no args, returns true if a server, else false
@@ -842,28 +843,28 @@ ADLB_Size_Cmd(ClientData cdata, Tcl_Interp *interp,
 /**
    usage: no args, returns number of servers
 */
-static int
+/*static int
 ADLB_Servers_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(adlb_init, "ADLB not initialized");
   Tcl_SetObjResult(interp, Tcl_NewIntObj(adlb_servers));
   return TCL_OK;
-}
+}*/
 
 /**
    usage: no args, returns number of workers
 */
-static int
+/*static int
 ADLB_Workers_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(adlb_init, "ADLB not initialized");
   Tcl_SetObjResult(interp, Tcl_NewIntObj(adlb_workers));
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Hostmap_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
                         int objc, Tcl_Obj *const objv[])
 {
@@ -889,13 +890,13 @@ ADLB_Hostmap_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, result);
 
   return TCL_OK;
-}
+}*/
 
 /**
     Output a list containing the entries of the hostmap
     Note that the Turbine version of this function is different
  */
-static int
+/*static int
 ADLB_Hostmap_List_Cmd(ClientData cdata, Tcl_Interp *interp,
                       int objc, Tcl_Obj *const objv[])
 {
@@ -928,7 +929,7 @@ ADLB_Hostmap_List_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewListObj((int)count, names);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::put <reserve_rank> <work type> <work unit> <priority>
@@ -1053,7 +1054,7 @@ ADLB_Set_Priority_Cmd(ClientData cdata, Tcl_Interp *interp,
    ADLB is done
    Stores answer_rank in given output variable
  */
-static int
+/*static int
 ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
              int objc, Tcl_Obj *const objv[])
 {
@@ -1144,7 +1145,7 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
                  EMPTY_FLAG);
 
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::iget <req_type> <answer_rank>
@@ -1152,7 +1153,7 @@ ADLB_Get_Cmd(ClientData cdata, Tcl_Interp *interp,
         "ADLB_SHUTDOWN" or "ADLB_NOTHING"
    Stores answer_rank in given output variable
  */
-static int
+/*static int
 ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
              int objc, Tcl_Obj *const objv[])
 {
@@ -1196,7 +1197,7 @@ ADLB_Iget_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, Tcl_NewStringObj(result, -1));
   return TCL_OK;
-}
+}*/
 
 /**
    Convert type string to adlb_data_type.
@@ -1405,7 +1406,7 @@ extract_create_props(Tcl_Interp *interp, bool accept_id, int argstart,
    if <id> is adlb::NULL_ID, returns a newly created id
    @param extra is only used for files and containers
 */
-static int
+/*static int
 ADLB_Create_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -1470,7 +1471,7 @@ ADLB_Create_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   TCL_CONDITION(rc == ADLB_SUCCESS, "<%"PRId64"> failed!", id);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::multicreate [list of variable specs]*
@@ -1511,7 +1512,7 @@ ADLB_Multicreate_Cmd(ClientData cdata, Tcl_Interp *interp,
     All globals have the permanent flag set so are not garbage collected.
     Must be called collectively by all ADLB ranks.
 */
-static int
+/*static int
 ADLB_Create_Globals_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -1554,7 +1555,7 @@ ADLB_Create_Globals_Cmd(ClientData cdata, Tcl_Interp *interp,
   }
   Tcl_SetObjResult(interp, Tcl_NewListObj(count, tcl_ids));
   return TCL_OK;
-}
+}*/
 
 static int
 parse_variable_spec_list(Tcl_Interp *interp, Tcl_Obj *const objv[],
@@ -1577,7 +1578,7 @@ parse_variable_spec_list(Tcl_Interp *interp, Tcl_Obj *const objv[],
 
    Returns server rank
  */
-static int
+/*static int
 ADLB_Locate_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -1591,9 +1592,9 @@ ADLB_Locate_Cmd(ClientData cdata, Tcl_Interp *interp,
   int rank = ADLB_Locate(handle.id);
   Tcl_SetObjResult(interp, Tcl_NewIntObj(rank));
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Exists_Impl(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[],
                 adlb_subscript_kind sub_kind)
@@ -1652,28 +1653,28 @@ ADLB_Exists_Impl(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewBooleanObj(b);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::exists <id> [ <read decr> ] [ <write decr> ]
  */
-static int
+/*static int
 ADLB_Exists_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Exists_Impl(cdata, interp, objc, objv, ADLB_SUB_NONE);
-}
+}*/
 
 /**
    usage: adlb::exists_sub <id> [<subscript>] [ <read decr> ]
                           [ <write decr> ]
  */
-static int
+/*static int
 ADLB_Exists_Sub_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Exists_Impl(cdata, interp, objc, objv, ADLB_SUB_CONTAINER);
-}
+}*/
 
 
 /**
@@ -1682,7 +1683,7 @@ ADLB_Exists_Sub_Cmd(ClientData cdata, Tcl_Interp *interp,
   NOTE: decrements are applied before checking for close
    usage: adlb::closed <id> [ <read decr> ] [ <write decr> ]
  */
-static int
+/*static int
 ADLB_Closed_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -1723,7 +1724,7 @@ ADLB_Closed_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewBooleanObj(closed);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /*
   Convert a tcl object to the ADLB representation.
@@ -2681,12 +2682,12 @@ static inline void report_type_mismatch(adlb_data_type expected,
    @param type: if provided, then check that data is of correct type
    returns the contents of the adlb datum converted to a tcl object
 */
-static int
+/*static int
 ADLB_Retrieve_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Retrieve_Impl(cdata, interp, objc, objv, false);
-}
+}*/
 
 /**
    usage: adlb::retrieve_decr <id> <decr> [<type>]
@@ -2889,13 +2890,13 @@ adlb_parse_accuracy(Tcl_Interp *interp, Tcl_Obj *obj,
    Retrieve and increment read refcount of referenced ids by increment.
    Decrement refcount of this id by decrement
 */
-static int
+/*static int
 ADLB_Acquire_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Acquire_Ref_Impl(cdata, interp, objc, objv,
                                false, ADLB_SUB_NONE);
-}
+}*/
 
 /**
    usage: adlb::acquire_write_ref <id> <type>
@@ -2904,13 +2905,13 @@ ADLB_Acquire_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
       <write increment>.
    Decrement refcount of this id by <read decrement>
 */
-static int
+/*static int
 ADLB_Acquire_Write_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Acquire_Ref_Impl(cdata, interp, objc, objv,
                                true, ADLB_SUB_NONE);
-}
+}*/
 
 /**
    usage: adlb::acquire_sub_ref <id> <subscript> <type> <increment>
@@ -2919,13 +2920,13 @@ ADLB_Acquire_Write_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
    ids by increment.
    Decrement refcount of this id by decrement
 */
-static int
+/*static int
 ADLB_Acquire_Sub_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Acquire_Ref_Impl(cdata, interp, objc, objv,
                                false, ADLB_SUB_CONTAINER);
-}
+}*/
 
 /**
    usage: adlb::acquire_sub_write_ref <id> <subscript> <type>
@@ -2934,15 +2935,15 @@ ADLB_Acquire_Sub_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
    of referenced ids by increment.
    Decrement refcount of this id by decrement
 */
-static int
+/*static int
 ADLB_Acquire_Sub_Write_Ref_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Acquire_Ref_Impl(cdata, interp, objc, objv,
                                true, ADLB_SUB_CONTAINER);
-}
+}*/
 
-static int
+/*static int
 ADLB_Acquire_Ref_Impl(ClientData cdata, Tcl_Interp *interp,
           int objc, Tcl_Obj *const objv[],
           bool write_ref, adlb_subscript_kind sub_kind)
@@ -3018,7 +3019,7 @@ ADLB_Acquire_Ref_Impl(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 static inline int
 set_enumerate_params(Tcl_Interp *interp, Tcl_Obj *const objv[],
                      const char* token, bool *include_keys,
@@ -3265,19 +3266,19 @@ ADLB_Retrieve_Blob_Impl(ClientData cdata, Tcl_Interp *interp,
    Must be freed with adlb::blob_free
    usage: adlb::retrieve_blob <id> => [ list <pointer> <length> ]
  */
-static int
+/*static int
 ADLB_Retrieve_Blob_Cmd(ClientData cdata, Tcl_Interp *interp,
                        int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Retrieve_Blob_Impl(cdata, interp, objc, objv, false);
-}
+}*/
 
-static int
+/*static int
 ADLB_Retrieve_Blob_Decr_Cmd(ClientData cdata, Tcl_Interp *interp,
                             int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Retrieve_Blob_Impl(cdata, interp, objc, objv, true);
-}
+}*/
 
 /**
  * Construct cache key
@@ -3460,7 +3461,7 @@ static int cache_blob(Tcl_Interp *interp, int objc,
   return TCL_OK;
 }
 
-static int uncache_blob(Tcl_Interp *interp, int objc,
+/*static int uncache_blob(Tcl_Interp *interp, int objc,
     Tcl_Obj *const objv[], adlb_datum_id id, adlb_subscript sub,
     bool *found_in_cache) {
   // Build key for the cache
@@ -3484,13 +3485,13 @@ static int uncache_blob(Tcl_Interp *interp, int objc,
     free(cache_key);
   }
   return TCL_OK;
-}
+}*/
 
 /**
    Free a local blob cached with adlb::blob_cache
    usage: adlb::blob_free <id>
  */
-static int
+/*static int
 ADLB_Blob_Free_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -3523,7 +3524,7 @@ ADLB_Blob_Free_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CHECK(rc);
 
   return TCL_OK;
-}
+}*/
 
 /**
    Free a local blob object.
@@ -3533,7 +3534,7 @@ ADLB_Blob_Free_Cmd(ClientData cdata, Tcl_Interp *interp,
    was allocated with malloc, so free it
    usage: adlb::local_blob_free <struct>
  */
-static int
+/*static int
 ADLB_Local_Blob_Free_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -3571,12 +3572,12 @@ ADLB_Local_Blob_Free_Cmd(ClientData cdata, Tcl_Interp *interp,
     TCL_CHECK(rc);
     return TCL_OK;
   }
-}
+}*/
 
 /**
    adlb::store_blob <id> <pointer> <length> [<decr>]
  */
-static int
+/*static int
 ADLB_Store_Blob_Cmd(ClientData cdata, Tcl_Interp *interp,
                     int objc, Tcl_Obj *const objv[])
 {
@@ -3607,12 +3608,12 @@ ADLB_Store_Blob_Cmd(ClientData cdata, Tcl_Interp *interp,
   CHECK_ADLB_STORE(rc, id, ADLB_NO_SUB);
 
   return TCL_OK;
-}
+}*/
 
 /**
    adlb::store_blob_floats <id> [ list doubles ] [<decr>]
  */
-static int
+/*static int
 ADLB_Blob_store_floats_Cmd(ClientData cdata, Tcl_Interp *interp,
                            int objc, Tcl_Obj *const objv[])
 {
@@ -3650,12 +3651,12 @@ ADLB_Blob_store_floats_Cmd(ClientData cdata, Tcl_Interp *interp,
   CHECK_ADLB_STORE(rc, id, ADLB_NO_SUB);
 
   return TCL_OK;
-}
+}*/
 
 /**
    adlb::store_blob_ints <id> [ list ints ] [<decr>]
  */
-static int
+/*static int
 ADLB_Blob_store_ints_Cmd(ClientData cdata, Tcl_Interp *interp,
                          int objc, Tcl_Obj *const objv[])
 {
@@ -3693,9 +3694,9 @@ ADLB_Blob_store_ints_Cmd(ClientData cdata, Tcl_Interp *interp,
   CHECK_ADLB_STORE(rc, id, ADLB_NO_SUB);
 
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Blob_From_Int_List_Cmd(ClientData cdata, Tcl_Interp *interp,
                            int objc, Tcl_Obj *const objv[])
 {
@@ -3724,9 +3725,9 @@ ADLB_Blob_From_Int_List_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Blob_From_Float_List_Cmd(ClientData cdata, Tcl_Interp *interp,
                            int objc, Tcl_Obj *const objv[])
 {
@@ -3754,12 +3755,12 @@ ADLB_Blob_From_Float_List_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    adlb::string2blob <string value> -> blob
  */
-static int
+/*static int
 ADLB_String2Blob_Cmd(ClientData cdata, Tcl_Interp *interp,
                            int objc, Tcl_Obj *const objv[])
 {
@@ -3781,13 +3782,13 @@ ADLB_String2Blob_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    adlb::blob2string <blob value> -> string
    Convert null-terminated blob to string
  */
-static int
+/*static int
 ADLB_Blob2String_Cmd(ClientData cdata, Tcl_Interp *interp,
                            int objc, Tcl_Obj *const objv[])
 {
@@ -3803,7 +3804,7 @@ ADLB_Blob2String_Cmd(ClientData cdata, Tcl_Interp *interp,
   int length = (int) (blob.length-1);
   Tcl_SetObjResult(interp, Tcl_NewStringObj(blob.value, length));
   return TCL_OK;
-}
+}*/
 
 static int
 ADLB_Insert_Impl(ClientData cdata, Tcl_Interp *interp,
@@ -3893,12 +3894,12 @@ ADLB_Insert_Cmd(ClientData cdata, Tcl_Interp *interp,
                         <type> [<extra for type>]
                        [<write refcount decr>] [<read refcount decr>]
 */
-static int
+/*static int
 ADLB_Struct_Insert_Cmd(ClientData cdata, Tcl_Interp *interp,
                        int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Insert_Impl(cdata, interp, objc, objv, ADLB_SUB_STRUCT);
-}
+}*/
 
 /**
    usage: adlb::insert_atomic <id> <subscript>
@@ -3906,7 +3907,7 @@ ADLB_Struct_Insert_Cmd(ClientData cdata, Tcl_Interp *interp,
               [<outer write decrements>] [<outer read decrements>]
    returns: 0 if the id[subscript] already existed, else 1
 */
-static int
+/*static int
 ADLB_Insert_Atomic_Cmd(ClientData cdata, Tcl_Interp *interp,
                        int objc, Tcl_Obj *const objv[])
 {
@@ -3973,9 +3974,9 @@ ADLB_Insert_Atomic_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, result);
 
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Lookup_Impl(Tcl_Interp *interp, int objc, Tcl_Obj *const objv[],
                  adlb_subscript_kind sub_kind, bool spin)
 {
@@ -4057,7 +4058,7 @@ ADLB_Lookup_Impl(Tcl_Interp *interp, int objc, Tcl_Obj *const objv[],
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    Lookup something in an ADLB container
@@ -4069,12 +4070,12 @@ ADLB_Lookup_Impl(Tcl_Interp *interp, int objc, Tcl_Obj *const objv[],
    incr (readers|writers) referand: increment reference counts of referand
    returns the member
 */
-static int
+/*static int
 ADLB_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Lookup_Impl(interp, objc, objv, ADLB_SUB_CONTAINER, false);
-}
+}*/
 
 /**
   Lookup something in an ADLB struct
@@ -4086,12 +4087,12 @@ ADLB_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
    incr (readers|writers) referand: increment reference counts of referand
    returns the member
 */
-static int
+/*static int
 ADLB_Struct_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     return ADLB_Lookup_Impl(interp, objc, objv, ADLB_SUB_STRUCT, false);
-}
+}*/
 
 /**
    usage: adlb::lookup_spin <id> <subscript>
@@ -4101,18 +4102,18 @@ ADLB_Struct_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
    incr (readers|writers) referand: increment reference counts of referand
    returns the member
 */
-static int
+/*static int
 ADLB_Lookup_Spin_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     return ADLB_Lookup_Impl(interp, objc, objv, ADLB_SUB_CONTAINER, true);
-}
+}*/
 
 /**
   usage: adlb::subscribe <handle> <work type>
   returns: 1 if subscribed, 0 if already exists
  */
-static int
+/*static int
 ADLB_Subscribe_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -4139,13 +4140,13 @@ ADLB_Subscribe_Cmd(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, Tcl_NewIntObj(subscribed));
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::lock <id> => false (try again) or
                              true (locked by caller)
 */
-static int
+/*static int
 ADLB_Lock_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
@@ -4163,12 +4164,12 @@ ADLB_Lock_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewBooleanObj(locked);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::unlock <id>
 */
-static int
+/*static int
 ADLB_Unlock_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
@@ -4183,12 +4184,12 @@ ADLB_Unlock_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CONDITION(rc == ADLB_SUCCESS, "<%"PRId64"> failed!", id);
 
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::unique => id
 */
-static int
+/*static int
 ADLB_Unique_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
@@ -4203,12 +4204,12 @@ ADLB_Unique_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewADLB_ID(id);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::container_typeof <id>
 */
-static int
+/*static int
 ADLB_Typeof_Cmd(ClientData cdata, Tcl_Interp *interp,
 		int objc, Tcl_Obj *const objv[])
 {
@@ -4233,12 +4234,12 @@ ADLB_Typeof_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, result);
 
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::container_typeof <id>
 */
-static int
+/*static int
 ADLB_Container_Typeof_Cmd(ClientData cdata, Tcl_Interp *interp,
                           int objc, Tcl_Obj *const objv[])
 {
@@ -4264,12 +4265,12 @@ ADLB_Container_Typeof_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, result);
 
   return TCL_OK;
-}
+}*/
 
-static int
+/*static int
 ADLB_Reference_Impl(ClientData cdata, Tcl_Interp *interp,
                              int objc, Tcl_Obj *const objv[],
-                             adlb_subscript_kind sub_kind);
+                             adlb_subscript_kind sub_kind);*/
 
 /**
    usage: adlb::container_reference
@@ -4280,13 +4281,13 @@ ADLB_Reference_Impl(ClientData cdata, Tcl_Interp *interp,
       reference_type is type of container field
       e.g. ref for plain turbine IDs
 */
-static int
+/*static int
 ADLB_Container_Reference_Cmd(ClientData cdata, Tcl_Interp *interp,
                              int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Reference_Impl(cdata, interp, objc, objv,
                              ADLB_SUB_CONTAINER);
-}
+}*/
 
 /**
    usage: adlb::struct_reference
@@ -4298,13 +4299,13 @@ ADLB_Container_Reference_Cmd(ClientData cdata, Tcl_Interp *interp,
       reference_type is type of container field
       e.g. ref for plain turbine IDs
 */
-static int
+/*static int
 ADLB_Struct_Reference_Cmd(ClientData cdata, Tcl_Interp *interp,
                              int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Reference_Impl(cdata, interp, objc, objv,
                              ADLB_SUB_STRUCT);
-}
+}*/
 
 static int
 ADLB_Create_Nested_Impl(ClientData cdata, Tcl_Interp *interp,
@@ -4535,13 +4536,13 @@ ADLB_Create_Nested_Cmd(ClientData cdata, Tcl_Interp *interp,
    id: id of a container to create nested datum in
    caller * refs: how many reference counts to give back to caller
  */
-static int
+/*static int
 ADLB_Create_Nested_Container_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Create_Nested_Impl(cdata, interp, objc, objv,
                       ADLB_DATA_TYPE_CONTAINER, ADLB_SUB_CONTAINER);
-}
+}*/
 
 /*
   adlb::create_nested_bag <id> <subscript> <val_type>
@@ -4551,13 +4552,13 @@ ADLB_Create_Nested_Container_Cmd(ClientData cdata, Tcl_Interp *interp,
    id: id of a container to create nested datum in
    caller * refs: how many reference counts to give back to caller
  */
-static int
+/*static int
 ADLB_Create_Nested_Bag_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Create_Nested_Impl(cdata, interp, objc, objv,
                       ADLB_DATA_TYPE_MULTISET, ADLB_SUB_CONTAINER);
-}
+}*/
 
 /*
   adlb::struct_create_nested <id> <subscript> <type> [<extra for type> ]
@@ -4567,13 +4568,13 @@ ADLB_Create_Nested_Bag_Cmd(ClientData cdata, Tcl_Interp *interp,
    id: id of a struct to create nested datum in
    caller * refs: how many reference counts to give back to caller
  */
-static int
+/*static int
 ADLB_Struct_Create_Nested_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Create_Nested_Impl(cdata, interp, objc, objv,
                       ADLB_DATA_TYPE_NULL, ADLB_SUB_STRUCT);
-}
+}*/
 
 /*
   adlb::struct_create_nested_container <id> <subscript> <key_type> <val_type>
@@ -4583,13 +4584,13 @@ ADLB_Struct_Create_Nested_Cmd(ClientData cdata, Tcl_Interp *interp,
    id: id of a struct to create nested datum in
    caller * refs: how many reference counts to give back to caller
  */
-static int
+/*static int
 ADLB_Struct_Create_Nested_Container_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Create_Nested_Impl(cdata, interp, objc, objv,
                       ADLB_DATA_TYPE_CONTAINER, ADLB_SUB_STRUCT);
-}
+}*/
 
 /*
   adlb::struct_create_nested_bag <id> <subscript> <val_type>
@@ -4599,16 +4600,16 @@ ADLB_Struct_Create_Nested_Container_Cmd(ClientData cdata, Tcl_Interp *interp,
    id: id of a struct to create nested datum in
    caller * refs: how many reference counts to give back to caller
  */
-static int
+/*static int
 ADLB_Struct_Create_Nested_Bag_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Create_Nested_Impl(cdata, interp, objc, objv,
                       ADLB_DATA_TYPE_MULTISET, ADLB_SUB_STRUCT);
-}
+}*/
 
 // container_reference, supporting different subscript formats
-static int
+/*static int
 ADLB_Reference_Impl(ClientData cdata, Tcl_Interp *interp,
                              int objc, Tcl_Obj *const objv[],
                              adlb_subscript_kind sub_kind)
@@ -4670,13 +4671,13 @@ ADLB_Reference_Impl(ClientData cdata, Tcl_Interp *interp,
 
   TCL_CONDITION(rc == ADLB_SUCCESS, "<%"PRId64"> failed!", handle.id);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::container_size <container_id> [ <read decr> ]
                                [ <write decr> ]
 */
-static int
+/*static int
 ADLB_Container_Size_Cmd(ClientData cdata, Tcl_Interp *interp,
                              int objc, Tcl_Obj *const objv[])
 {
@@ -4712,7 +4713,7 @@ ADLB_Container_Size_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj* result = Tcl_NewIntObj(size);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::write_refcount_incr <id> [ increment ]
@@ -4821,7 +4822,7 @@ ADLB_Refcount_Incr_Impl(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
+/*static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
                           Tcl_Obj* obj, adlb_refcount_type *mode)
 {
   const char *mode_string = Tcl_GetString(obj);
@@ -4848,13 +4849,13 @@ static int refcount_mode(Tcl_Interp *interp, Tcl_Obj *const objv[],
     Tcl_AddErrorInfo(interp, err);
     return TCL_ERROR;
   }
-}
+}*/
 
 /**
    usage: adlb::refcount_incr <container_id> <refcount_type> <change>
    refcount_type in { r, w, rw }
 */
-static int
+/*static int
 ADLB_Refcount_Incr_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -4865,7 +4866,7 @@ ADLB_Refcount_Incr_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_CHECK(rc);
   return ADLB_Refcount_Incr_Impl(cdata, interp, objc, objv, mode,
                           objv[1], objv[3], false);
-}
+}*/
 
 static int
 ADLB_Read_Refcount_Incr_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -4924,7 +4925,7 @@ ADLB_Xpt_Enabled_Cmd(ClientData cdata, Tcl_Interp *interp,
   flush policy: no_flush, periodic_flush, or always_flush
   max index val size: maximum size of value to store in index
  */
-static int
+/*static int
 ADLB_Xpt_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -4967,7 +4968,7 @@ ADLB_Xpt_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_RETURN_ERROR("Checkpointing not enabled in Turbine build");
   return TCL_ERROR;
 #endif
-}
+}*/
 
 /**
   Usage: adlb::xpt_finalize
@@ -4993,7 +4994,7 @@ ADLB_Xpt_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
                 persist to file
   index add: int interpreted as boolean: whether to add to index
  */
-static int
+/*static int
 ADLB_Xpt_Write_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -5041,7 +5042,7 @@ ADLB_Xpt_Write_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_RETURN_ERROR("Checkpointing not enabled in Turbine build");
   return TCL_ERROR;
 #endif
-}
+}*/
 
 /**
   usage: adlb::xpt_lookup <checkpoint key> [ <checkpoint value> ]
@@ -5050,7 +5051,7 @@ ADLB_Xpt_Write_Cmd(ClientData cdata, Tcl_Interp *interp,
                     as blob
   checkpoint key: packed checkpoint key as blob
  */
-static int
+/*static int
 ADLB_Xpt_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -5096,7 +5097,7 @@ ADLB_Xpt_Lookup_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_RETURN_ERROR("Checkpointing not enabled in Turbine build");
   return TCL_ERROR;
 #endif
-}
+}*/
 
 
 /*
@@ -5197,7 +5198,7 @@ exit_err:
 /**
   usage: adlb::xpt_pack (<type> <value>)*
  */
-static int
+/*static int
 ADLB_Xpt_Pack_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -5241,7 +5242,7 @@ ADLB_Xpt_Pack_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_Obj *packedBlob = build_tcl_blob(packed.data, pos, NULL);
   Tcl_SetObjResult(interp, packedBlob);
   return TCL_OK;
-}
+}*/
 
 /**
   usage: adlb::xpt_unpack (<var name>)* <packed data> (<var type>)
@@ -5249,7 +5250,7 @@ ADLB_Xpt_Pack_Cmd(ClientData cdata, Tcl_Interp *interp,
   var type: ADLB types for the packed fields
   The number of var names and types must match
  */
-static int
+/*static int
 ADLB_Xpt_Unpack_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -5303,7 +5304,7 @@ ADLB_Xpt_Unpack_Cmd(ClientData cdata, Tcl_Interp *interp,
                   Tcl_GetString(varName));
   }
   return TCL_OK;
-}
+}*/
 
 /**
   usage: adlb::xpt_reload <checkpoint file name> <loader rank>
@@ -5316,7 +5317,7 @@ ADLB_Xpt_Unpack_Cmd(ClientData cdata, Tcl_Interp *interp,
             Each rank entry is a dict with statistics: valid and
             invalid counts.
  */
-static int
+/*static int
 ADLB_Xpt_Reload_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
@@ -5372,13 +5373,13 @@ ADLB_Xpt_Reload_Cmd(ClientData cdata, Tcl_Interp *interp,
   TCL_RETURN_ERROR("Checkpointing not enabled in Turbine build");
   return TCL_ERROR;
 #endif
-}
+}*/
 
 /**
    Same as builtin dict create except don't allow duplicates.
    usage: adlb::dict_create key1 val1 key2 val2 ...
  */
-static int
+/*static int
 ADLB_Dict_Create_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
@@ -5411,7 +5412,7 @@ ADLB_Dict_Create_Cmd(ClientData cdata, Tcl_Interp *interp,
   }
   Tcl_SetObjResult(interp, dict);
   return TCL_OK;
-}
+}*/
 
 /**
  * Handle input of forms:
@@ -5699,7 +5700,7 @@ ADLB_Parse_Handle_Cleanup(Tcl_Interp *interp, Tcl_Obj *const objv[],
   return TCL_OK;
 }
 
-static int
+/*static int
 ADLB_Subscript_Impl(ClientData cdata, Tcl_Interp *interp,
      int objc, Tcl_Obj *const objv[], adlb_subscript_kind sub_kind)
 {
@@ -5761,7 +5762,7 @@ ADLB_Subscript_Impl(ClientData cdata, Tcl_Interp *interp,
 
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
-}
+}*/
 
 /**
   Build a handle for an id + subscript into a struct.
@@ -5770,20 +5771,20 @@ ADLB_Subscript_Impl(ClientData cdata, Tcl_Interp *interp,
   handle: either an id, or a handle built by this function
   subscript: a valid subscript into a struct
  */
-static int
+/*static int
 ADLB_Subscript_Struct_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Subscript_Impl(cdata, interp, objc, objv, ADLB_SUB_STRUCT);
-}
+}*/
 
-static int
+/*static int
 ADLB_Subscript_Container_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
   return ADLB_Subscript_Impl(cdata, interp, objc, objv,
                              ADLB_SUB_CONTAINER);
-}
+}*/
 
 /**
    usage: adlb::add_debug_symbol <symbol> <name> <context>
@@ -5819,7 +5820,7 @@ ADLB_Add_Debug_Symbol_Cmd(ClientData cdata, Tcl_Interp *interp,
    returns: two element list with two strings for name and context,
             empty strings if none
  */
-static int
+/*static int
 ADLB_Debug_Symbol_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
@@ -5842,29 +5843,29 @@ ADLB_Debug_Symbol_Cmd(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, Tcl_NewListObj(2, result_items));
 
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::fail
  */
-static int
+/*static int
 ADLB_Fail_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
   ADLB_Fail(1);
   return TCL_OK;
-}
+}*/
 
 /**
    usage: adlb::abort
  */
-static int
+/*static int
 ADLB_Abort_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
   ADLB_Abort(1);
   return TCL_OK;
-}
+}*/
 
 
 /**
@@ -5948,96 +5949,95 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("init_comm", ADLB_Init_Comm_Cmd);
   COMMAND("init",      ADLB_Init_Cmd);
   COMMAND("declare_struct_type", ADLB_Declare_Struct_Type_Cmd);
-  COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
+  // COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
   COMMAND("server",    ADLB_Server_Cmd);
   COMMAND("rank",      ADLB_CommRank_Cmd);
-  COMMAND("size",      ADLB_CommSize_Cmd);
+  // COMMAND("size",      ADLB_CommSize_Cmd);
   COMMAND("comm_get",  ADLB_CommGet_Cmd);
-  COMMAND("barrier",   ADLB_Barrier_Cmd);
-  COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
-  COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
+  // COMMAND("barrier",   ADLB_Barrier_Cmd);
+  // COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
+  // COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
   COMMAND("amserver",  ADLB_AmServer_Cmd);
   COMMAND("size",      ADLB_Size_Cmd);
-  COMMAND("servers",   ADLB_Servers_Cmd);
-  COMMAND("workers",   ADLB_Workers_Cmd);
-  COMMAND("hostmap_lookup",   ADLB_Hostmap_Lookup_Cmd);
-  COMMAND("hostmap_list",     ADLB_Hostmap_List_Cmd);
+  // COMMAND("servers",   ADLB_Servers_Cmd);
+  // COMMAND("workers",   ADLB_Workers_Cmd);
+  // COMMAND("hostmap_lookup",   ADLB_Hostmap_Lookup_Cmd);
+  // COMMAND("hostmap_list",     ADLB_Hostmap_List_Cmd);
   COMMAND("get_priority",   ADLB_Get_Priority_Cmd);
   COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);
   COMMAND("set_priority",   ADLB_Set_Priority_Cmd);
   COMMAND("put",       ADLB_Put_Cmd);
   COMMAND("spawn",     ADLB_Spawn_Cmd);
-  COMMAND("get",       ADLB_Get_Cmd);
-  COMMAND("iget",      ADLB_Iget_Cmd);
-  COMMAND("create",    ADLB_Create_Cmd);
+  // COMMAND("get",       ADLB_Get_Cmd);
+  // COMMAND("iget",      ADLB_Iget_Cmd);
+  // COMMAND("create",    ADLB_Create_Cmd);
   COMMAND("multicreate",ADLB_Multicreate_Cmd);
-  COMMAND("create_globals",ADLB_Create_Globals_Cmd);
-  COMMAND("locate",    ADLB_Locate_Cmd);
-  COMMAND("exists",    ADLB_Exists_Cmd);
-  COMMAND("exists_sub", ADLB_Exists_Sub_Cmd);
-  COMMAND("closed", ADLB_Closed_Cmd);
+  // COMMAND("create_globals",ADLB_Create_Globals_Cmd);
+  // COMMAND("locate",    ADLB_Locate_Cmd);
+  // COMMAND("exists",    ADLB_Exists_Cmd);
+  // COMMAND("exists_sub", ADLB_Exists_Sub_Cmd);
+  // COMMAND("closed", ADLB_Closed_Cmd);
   COMMAND("store",     ADLB_Store_Cmd);
-  COMMAND("retrieve",  ADLB_Retrieve_Cmd);
+  // COMMAND("retrieve",  ADLB_Retrieve_Cmd);
   COMMAND("retrieve_decr",  ADLB_Retrieve_Decr_Cmd);
-  COMMAND("acquire_ref",  ADLB_Acquire_Ref_Cmd);
-  COMMAND("acquire_write_ref",  ADLB_Acquire_Write_Ref_Cmd);
-  COMMAND("acquire_sub_ref",  ADLB_Acquire_Sub_Ref_Cmd);
-  COMMAND("acquire_sub_write_ref",  ADLB_Acquire_Sub_Write_Ref_Cmd);
+  // COMMAND("acquire_ref",  ADLB_Acquire_Ref_Cmd);
+  // COMMAND("acquire_write_ref",  ADLB_Acquire_Write_Ref_Cmd);
+  // COMMAND("acquire_sub_ref",  ADLB_Acquire_Sub_Ref_Cmd);
+  // COMMAND("acquire_sub_write_ref",  ADLB_Acquire_Sub_Write_Ref_Cmd);
   COMMAND("enumerate", ADLB_Enumerate_Cmd);
-  COMMAND("retrieve_blob", ADLB_Retrieve_Blob_Cmd);
-  COMMAND("retrieve_decr_blob", ADLB_Retrieve_Blob_Decr_Cmd);
-  COMMAND("blob_free",  ADLB_Blob_Free_Cmd);
-  COMMAND("local_blob_free",  ADLB_Local_Blob_Free_Cmd);
-  COMMAND("store_blob", ADLB_Store_Blob_Cmd);
-  COMMAND("store_blob_floats", ADLB_Blob_store_floats_Cmd);
-  COMMAND("store_blob_ints", ADLB_Blob_store_ints_Cmd);
-  COMMAND("blob_from_float_list", ADLB_Blob_From_Float_List_Cmd);
-  COMMAND("blob_from_int_list", ADLB_Blob_From_Int_List_Cmd);
-  COMMAND("string2blob", ADLB_String2Blob_Cmd);
-  COMMAND("blob2string", ADLB_Blob2String_Cmd);
+  // COMMAND("retrieve_blob", ADLB_Retrieve_Blob_Cmd);
+  // COMMAND("retrieve_decr_blob", ADLB_Retrieve_Blob_Decr_Cmd);
+  // COMMAND("blob_free",  ADLB_Blob_Free_Cmd);
+  // COMMAND("local_blob_free",  ADLB_Local_Blob_Free_Cmd);
+  // COMMAND("store_blob", ADLB_Store_Blob_Cmd);
+  // COMMAND("store_blob_floats", ADLB_Blob_store_floats_Cmd);
+  // COMMAND("store_blob_ints", ADLB_Blob_store_ints_Cmd);
+  // COMMAND("blob_from_float_list", ADLB_Blob_From_Float_List_Cmd);
+  // COMMAND("blob_from_int_list", ADLB_Blob_From_Int_List_Cmd);
+  // COMMAND("string2blob", ADLB_String2Blob_Cmd);
+  // COMMAND("blob2string", ADLB_Blob2String_Cmd);
   COMMAND("enable_read_refcount",  ADLB_Enable_Read_Refcount_Cmd);
-  COMMAND("refcount_incr", ADLB_Refcount_Incr_Cmd);
+  // COMMAND("refcount_incr", ADLB_Refcount_Incr_Cmd);
   COMMAND("read_refcount_incr", ADLB_Read_Refcount_Incr_Cmd);
   COMMAND("read_refcount_decr", ADLB_Read_Refcount_Decr_Cmd);
   COMMAND("write_refcount_incr", ADLB_Write_Refcount_Incr_Cmd);
   COMMAND("write_refcount_decr", ADLB_Write_Refcount_Decr_Cmd);
   COMMAND("insert",    ADLB_Insert_Cmd);
-  COMMAND("struct_insert",    ADLB_Struct_Insert_Cmd);
-  COMMAND("insert_atomic", ADLB_Insert_Atomic_Cmd);
-  COMMAND("lookup",    ADLB_Lookup_Cmd);
-  COMMAND("struct_lookup",    ADLB_Struct_Lookup_Cmd);
-  COMMAND("lookup_spin", ADLB_Lookup_Spin_Cmd);
-  COMMAND("subscribe",  ADLB_Subscribe_Cmd);
-  COMMAND("lock",      ADLB_Lock_Cmd);
-  COMMAND("unlock",    ADLB_Unlock_Cmd);
-  COMMAND("unique",    ADLB_Unique_Cmd);
-  COMMAND("typeof",    ADLB_Typeof_Cmd);
-  COMMAND("container_typeof",    ADLB_Container_Typeof_Cmd);
-  COMMAND("container_reference", ADLB_Container_Reference_Cmd);
-  COMMAND("container_size",      ADLB_Container_Size_Cmd);
-  COMMAND("struct_reference", ADLB_Struct_Reference_Cmd);
+  // COMMAND("struct_insert",    ADLB_Struct_Insert_Cmd);
+  // COMMAND("insert_atomic", ADLB_Insert_Atomic_Cmd);
+  // COMMAND("lookup",    ADLB_Lookup_Cmd);
+  // COMMAND("struct_lookup",    ADLB_Struct_Lookup_Cmd);
+  // COMMAND("lookup_spin", ADLB_Lookup_Spin_Cmd);
+  // COMMAND("subscribe",  ADLB_Subscribe_Cmd);
+  // COMMAND("lock",      ADLB_Lock_Cmd);
+  // COMMAND("unlock",    ADLB_Unlock_Cmd);
+  // COMMAND("unique",    ADLB_Unique_Cmd);
+  // COMMAND("typeof",    ADLB_Typeof_Cmd);
+  // COMMAND("container_typeof",    ADLB_Container_Typeof_Cmd);
+  // COMMAND("container_reference", ADLB_Container_Reference_Cmd);
+  // COMMAND("container_size",      ADLB_Container_Size_Cmd);
+  // COMMAND("struct_reference", ADLB_Struct_Reference_Cmd);
   COMMAND("create_nested", ADLB_Create_Nested_Cmd);
-  COMMAND("create_nested_container", ADLB_Create_Nested_Container_Cmd);
-  COMMAND("create_nested_bag", ADLB_Create_Nested_Bag_Cmd);
-  COMMAND("struct_create_nested", ADLB_Struct_Create_Nested_Cmd);
-  COMMAND("struct_create_nested_container",
-                        ADLB_Struct_Create_Nested_Container_Cmd);
-  COMMAND("struct_create_nested_bag", ADLB_Struct_Create_Nested_Bag_Cmd);
+  // COMMAND("create_nested_container", ADLB_Create_Nested_Container_Cmd);
+  // COMMAND("create_nested_bag", ADLB_Create_Nested_Bag_Cmd);
+  // COMMAND("struct_create_nested", ADLB_Struct_Create_Nested_Cmd);
+  // COMMAND("struct_create_nested_container", ADLB_Struct_Create_Nested_Container_Cmd);
+  // COMMAND("struct_create_nested_bag", ADLB_Struct_Create_Nested_Bag_Cmd);
   COMMAND("xpt_enabled", ADLB_Xpt_Enabled_Cmd);
-  COMMAND("xpt_init", ADLB_Xpt_Init_Cmd);
+  // COMMAND("xpt_init", ADLB_Xpt_Init_Cmd);
   COMMAND("xpt_finalize", ADLB_Xpt_Finalize_Cmd);
-  COMMAND("xpt_write", ADLB_Xpt_Write_Cmd);
-  COMMAND("xpt_lookup", ADLB_Xpt_Lookup_Cmd);
-  COMMAND("xpt_pack", ADLB_Xpt_Pack_Cmd);
-  COMMAND("xpt_unpack", ADLB_Xpt_Unpack_Cmd);
-  COMMAND("xpt_reload", ADLB_Xpt_Reload_Cmd);
-  COMMAND("dict_create", ADLB_Dict_Create_Cmd);
-  COMMAND("subscript_struct", ADLB_Subscript_Struct_Cmd);
-  COMMAND("subscript_container", ADLB_Subscript_Container_Cmd);
+  // COMMAND("xpt_write", ADLB_Xpt_Write_Cmd);
+  // COMMAND("xpt_lookup", ADLB_Xpt_Lookup_Cmd);
+  // COMMAND("xpt_pack", ADLB_Xpt_Pack_Cmd);
+  // COMMAND("xpt_unpack", ADLB_Xpt_Unpack_Cmd);
+  // COMMAND("xpt_reload", ADLB_Xpt_Reload_Cmd);
+  // COMMAND("dict_create", ADLB_Dict_Create_Cmd);
+  // COMMAND("subscript_struct", ADLB_Subscript_Struct_Cmd);
+  // COMMAND("subscript_container", ADLB_Subscript_Container_Cmd);
   COMMAND("add_debug_symbol", ADLB_Add_Debug_Symbol_Cmd);
-  COMMAND("debug_symbol", ADLB_Debug_Symbol_Cmd);
-  COMMAND("fail",      ADLB_Fail_Cmd);
-  COMMAND("abort",     ADLB_Abort_Cmd);
+  // COMMAND("debug_symbol", ADLB_Debug_Symbol_Cmd);
+  // COMMAND("fail",      ADLB_Fail_Cmd);
+  // COMMAND("abort",     ADLB_Abort_Cmd);
   COMMAND("finalize",  ADLB_Finalize_Cmd);
 
   // Export all commands
