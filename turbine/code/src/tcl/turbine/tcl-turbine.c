@@ -98,7 +98,7 @@ Turbine_ParseInt_Impl(ClientData cdata, Tcl_Interp *interp,
 /**
    @see TURBINE_CHECK
 */
-static void
+/*static void
 turbine_check_failed(Tcl_Interp* interp, turbine_code code,
                      char* format, ...)
 {
@@ -113,7 +113,7 @@ turbine_check_failed(Tcl_Interp* interp, turbine_code code,
   turbine_code_tostring(p, code);
   printf("turbine_check_failed: %s\n", buffer);
   Tcl_AddErrorInfo(interp, buffer);
-}
+}*/
 
 /**
    If code is not SUCCESS, return a Tcl error that includes the
@@ -624,26 +624,7 @@ static int
 Turbine_Cache_Check_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(2);
-  turbine_datum_id td;
-  const char *subscript;
-  size_t subscript_len;
-  int error = ADLB_EXTRACT_HANDLE(objv[1], &td, &subscript,
-                                  &subscript_len);
-  TCL_CHECK(error);
-
-  bool found;
-  if (subscript_len == 0)
-  {
-    found = turbine_cache_check(td);
-  }
-  else
-  {
-    // TODO: handle caching subscripts - currently just ignore
-    found = false;
-  }
-
-  Tcl_Obj* result = Tcl_NewBooleanObj(found);
+  Tcl_Obj* result = Tcl_NewBooleanObj(false);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
 }
@@ -677,11 +658,11 @@ Turbine_Cache_Retrieve_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }*/
 
-static int
+/*static int
 turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
                turbine_datum_id td, turbine_type type,
                adlb_type_extra extra, Tcl_Obj* obj,
-               bool canonicalize, void** result, size_t* length);
+               bool canonicalize, void** result, size_t* length);*/
 
 /**
    usage turbine::cache_store $td $type [ extra type info ] $value
@@ -690,50 +671,12 @@ static int
 Turbine_Cache_Store_Cmd(ClientData cdata, Tcl_Interp* interp,
                 int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(objc >= 4, "requires >= 4 args");
-
-  turbine_datum_id td;
-  void* data = NULL;
-  size_t length = 0;
-
-  int argpos = 1;
-  int error;
-
-  const char *subscript;
-  size_t subscript_len;
-  error = ADLB_EXTRACT_HANDLE(objv[argpos++], &td, &subscript,
-                                  &subscript_len);
-  TCL_CHECK(error);
-
-  if (subscript_len != 0)
-  {
-    // TODO: handle caching subscripts
-    return TCL_OK;
-  }
-
-  adlb_data_type type;
-  adlb_type_extra extra;
-  error = adlb_type_from_obj_extra(interp, objv, objv[argpos++], &type,
-                              &extra);
-  TCL_CHECK(error);
-
-  TCL_CONDITION(argpos < objc, "not enough arguments");
-  error = turbine_tclobj2bin(interp, objv, td, type, extra,
-                         objv[argpos++], false, &data, &length);
-  TCL_CHECK_MSG(error, "object extraction failed: <%"PRId64">", td);
-
-  TCL_CONDITION(argpos == objc, "extra trailing arguments from %i",
-                argpos);
-
-  turbine_code rc = turbine_cache_store(td, type, data, length);
-  TURBINE_CHECK(rc, "cache store failed: %"PRId64"", td);
-
   return TCL_OK;
 }
 
 // Allocate a binary buffer and serialize a tcl object into it
 //  for the specified ADLB type
-static int
+/*static int
 turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
                turbine_datum_id td, turbine_type type,
                adlb_type_extra extra, Tcl_Obj* obj,
@@ -756,7 +699,7 @@ turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
   *result = data.caller_data;
   *length = data.length;
   return TCL_OK;
-}
+}*/
 
 /* usage: worker_loop <work type> [<keyword arg dict>]
    Repeatedly run units of work from ADLB of provided type
@@ -1195,11 +1138,6 @@ Noop_Exec_Register_Cmd(ClientData cdata, Tcl_Interp *interp,
 {
   TCL_ARGS(1);
 
-  turbine_code tc;
-  tc = noop_executor_register();
-  TCL_CONDITION(tc == TURBINE_SUCCESS,
-                "Could not register noop executor");
-
   return TCL_OK;
 }
 
@@ -1213,28 +1151,6 @@ Coaster_Register_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
   TCL_ARGS(1);
-
-#if HAVE_COASTER == 1
-  turbine_code tc;
-  tc = coaster_executor_register();
-  TCL_CONDITION(tc == TURBINE_SUCCESS,
-                "Could not register Coaster executor");
-
-  coaster_log_level threshold = COASTER_LOG_WARN;
-
-  // Turn on debugging based on debug tokens.
-  if (turbine_debug_enabled) {
-#ifdef ENABLE_DEBUG_COASTER
-    // Only enable detailed debugging if coaster debugging on
-    threshold = COASTER_LOG_DEBUG;
-#else
-    threshold = COASTER_LOG_INFO;
-#endif
-  }
-
-  coaster_rc crc = coaster_set_log_threshold(threshold);
-  TCL_CONDITION(crc == COASTER_SUCCESS, "Could not set log threshold");
-#endif
   return TCL_OK;
 }
 
@@ -1247,28 +1163,7 @@ Async_Exec_Names_Cmd(ClientData cdata, Tcl_Interp* interp,
 {
   TCL_ARGS(1);
 
-  turbine_code tc;
-
-  const int names_size = TURBINE_ASYNC_EXEC_LIMIT;
-  const char *names[names_size];
-  int n;
-  tc = turbine_async_exec_names(names, names_size, &n);
-  TCL_CONDITION(tc == TURBINE_SUCCESS, "Error enumerating executors");
-
-  assert(n >= 0 && n <= names_size);
-
-  Tcl_Obj * name_objs[n];
-
-  for (int i = 0; i < n; i++)
-  {
-    const char *exec_name = names[i];
-    assert(exec_name != NULL);
-
-    name_objs[i] = Tcl_NewStringObj(exec_name, -1);
-    TCL_CONDITION(name_objs[i] != NULL, "Error allocating string");
-  }
-
-  Tcl_SetObjResult(interp, Tcl_NewListObj(n, name_objs));
+  Tcl_SetObjResult(interp, Tcl_NewListObj(0, NULL));
   return TCL_OK;
 }
 
@@ -1771,32 +1666,32 @@ Tclturbine_Init(Tcl_Interp* interp)
 
   COMMAND("init",        Turbine_Init_Cmd);
   COMMAND("init_debug",  Turbine_Init_Debug_Cmd);
-  COMMAND("version",     Turbine_Version_Cmd);
+  COMMAND("version",     Turbine_Version_Cmd);	// GOOD
   COMMAND("rule",        Turbine_Rule_Cmd);
   // COMMAND("ruleopts",    Turbine_RuleOpts_Cmd);
-  COMMAND("log",         Turbine_Log_Cmd);
-  COMMAND("normalize",   Turbine_Normalize_Cmd);
+  COMMAND("log",         Turbine_Log_Cmd);	// GOOD
+  COMMAND("normalize",   Turbine_Normalize_Cmd);	// GOOD
   COMMAND("worker_loop", Turbine_Worker_Loop_Cmd);
-  COMMAND("cache_check", Turbine_Cache_Check_Cmd);
+  COMMAND("cache_check", Turbine_Cache_Check_Cmd);	// DISABLED
   // COMMAND("cache_retrieve", Turbine_Cache_Retrieve_Cmd);
-  COMMAND("cache_store", Turbine_Cache_Store_Cmd);
+  COMMAND("cache_store", Turbine_Cache_Store_Cmd);	// DISABLED
   // COMMAND("task_comm",   Turbine_TaskComm_Cmd);
   COMMAND("finalize",    Turbine_Finalize_Cmd);
   // COMMAND("debug_on",    Turbine_Debug_On_Cmd);
-  COMMAND("debug",       Turbine_Debug_Cmd);
+  COMMAND("debug",       Turbine_Debug_Cmd);	// GOOD
   // COMMAND("toint_impl", Turbine_ToIntImpl_Cmd);
-  COMMAND("parse_int_impl", Turbine_ParseIntImpl_Cmd);
+  COMMAND("parse_int_impl", Turbine_ParseIntImpl_Cmd);	// GOOD (I think)
 
   // COMMAND("sync_exec", Sync_Exec_Cmd);
 
-  COMMAND("async_exec_names", Async_Exec_Names_Cmd);
+  COMMAND("async_exec_names", Async_Exec_Names_Cmd);	// DISABLED
   // COMMAND("async_exec_configure", Async_Exec_Configure_Cmd);
   // COMMAND("async_exec_worker_loop", Async_Exec_Worker_Loop_Cmd);
 
-  COMMAND("noop_exec_register", Noop_Exec_Register_Cmd);
+  COMMAND("noop_exec_register", Noop_Exec_Register_Cmd);	// DISABLED
   // COMMAND("noop_exec_run", Noop_Exec_Run_Cmd);
 
-  COMMAND("coaster_register", Coaster_Register_Cmd);
+  COMMAND("coaster_register", Coaster_Register_Cmd);	// DISABLED
   // COMMAND("coaster_run", Coaster_Run_Cmd);
 
   // COMMAND("bcast",   Turbine_Bcast_Cmd);
