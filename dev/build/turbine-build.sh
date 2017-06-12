@@ -155,6 +155,7 @@ if (( CONFIGURE )); then
                 --with-adlb=${LB_INSTALL} \
                 ${CRAY_ARGS} \
                 --with-c-utils=${C_UTILS_INSTALL} \
+		--with-xtask=${XTASK_INSTALL} \
                 --prefix=${TURBINE_INSTALL} \
                 ${EXTRA_ARGS} \
                 --disable-log

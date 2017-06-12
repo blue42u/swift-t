@@ -159,6 +159,7 @@ LB_INSTALL=${SWIFT_T_PREFIX}/lb
 C_UTILS_INSTALL=${SWIFT_T_PREFIX}/c-utils
 TURBINE_INSTALL=${SWIFT_T_PREFIX}/turbine
 STC_INSTALL=${SWIFT_T_PREFIX}/stc
+XTASK_INSTALL=${EXM_SRC_ROOT}/xtask
 
 #+======================================+
 #|| Developer options (debugging, etc) ||

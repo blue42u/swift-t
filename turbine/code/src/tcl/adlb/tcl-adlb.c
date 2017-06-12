@@ -72,6 +72,8 @@
 
 #include "tcl-adlb.h"
 
+#include <xtask_api.h>
+
 // Auto-detect: Old ADLB or new XLB
 #ifdef XLB
 #define USE_XLB

@@ -202,6 +202,25 @@ else
 fi
 AC_SUBST(USE_LIBCUTILS_A)
 
+USE_XTASK=0
+AC_ARG_WITH(xtask,
+    AS_HELP_STRING([--with-xtask], [location of XTask]),
+    [
+        AC_MSG_CHECKING([for ${withval}/xtask_api.h])
+        [[ -r ${withval}/xtask_api.h ]] && USE_XTASK=1
+        if [[ ${USE_XTASK} == 0 ]]
+        then
+            AC_MSG_ERROR([Could not find XTask in $withval])
+        fi
+        AC_MSG_RESULT([yes])
+        USE_XTASK=${withval}
+    ],
+    [
+        [[ ${USE_C_UTILS} == 0 ]] && AC_MSG_ERROR([Not found: XTask])
+    ]
+)
+AC_SUBST(USE_XTASK)
+
 # MPI defaults (may be overridden on special systems)
 USE_MACHINE=normal
 # The "launcher" is used by job submission systems to launch jobs

@@ -195,6 +195,8 @@ RANLIB  = @RANLIB@
 C_UTILS = @USE_C_UTILS@
 LIBCUTILS_A := @USE_LIBCUTILS_A@
 
+XTASK = @USE_XTASK@
+
 TCL := @USE_TCL@
 TCL_VERSION := @TCL_VERSION@
 TCLSH := @USE_TCLSH@
@@ -283,6 +285,7 @@ endif
 # This is referenced in lookup3.c - may want to drop this for speed
 DEFINES += -D VALGRIND
 INCLUDES += -I $(C_UTILS)/include
+INCLUDES += -I $(XTASK)
 INCLUDES += @TCL_INCLUDE_SPEC@
 ifeq ($(ENABLE_MPE),1)
 	INCLUDES += -I $(USE_MPE)/include
