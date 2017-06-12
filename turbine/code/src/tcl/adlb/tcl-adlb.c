@@ -741,24 +741,7 @@ static int
 ADLB_CommRank_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
-  int result = -1;
-  if (objc == 1)
-  {
-    TCL_CONDITION(adlb_comm_init, "ADLB communicator not initialized");
-    result = adlb_comm_rank;
-  }
-  else if (objc == 2)
-  {
-    int comm_int;
-    int rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-    TCL_CHECK_MSG(rc, "Not an integer: %i", comm_int);
-    MPI_Comm comm = (MPI_Comm) comm_int;
-    MPI_Comm_rank(comm, &result);
-  }
-  else
-    TCL_RETURN_ERROR("requires 1 or 2 arguments!");
-
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
   return TCL_OK;
 }
 
@@ -783,23 +766,7 @@ static int
 ADLB_CommGet_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(2);
-  char* comm_name = Tcl_GetString(objv[1]);
-  MPI_Comm comm;
-  if (strcmp(comm_name, "world") == 0)
-    comm = MPI_COMM_WORLD;
-  else if (strcmp(comm_name, "adlb") == 0)
-    comm = MPI_COMM_WORLD;
-  else if (strcmp(comm_name, "null") == 0)
-    comm = MPI_COMM_NULL;
-  else if (strcmp(comm_name, "leaders") == 0)
-    comm = ADLB_GetComm_leaders();
-  else if (strcmp(comm_name, "workers") == 0)
-    comm = ADLB_GetComm_workers();
-  else
-    return turbine_user_errorv
-      (interp, "adlb::comm_get: error: unknown comm: %s", comm_name);
-  Tcl_Obj* result = Tcl_NewLongObj(comm);
+  Tcl_Obj* result = Tcl_NewLongObj(-1);
   Tcl_SetObjResult(interp, result);
   return TCL_OK;
 }
@@ -836,7 +803,7 @@ ADLB_Size_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
   TCL_CONDITION(adlb_comm_init, "ADLB communicator not initialized");
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(adlb_comm_size));
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(10000));
   return TCL_OK;
 }
 
@@ -1017,7 +984,7 @@ ADLB_Get_Priority_Cmd(ClientData cdata, Tcl_Interp *interp,
   // Return a tcl int
   // Tcl_SetIntObj doesn't like shared values, but it should be
   // safe in our use case to modify in-place
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(ADLB_curr_priority));
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
   return TCL_OK;
 }
 
@@ -1028,8 +995,6 @@ static int
 ADLB_Reset_Priority_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(1);
-  ADLB_curr_priority = DEFAULT_PRIORITY;
   return TCL_OK;
 }
 
@@ -1040,11 +1005,6 @@ static int
 ADLB_Set_Priority_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(2);
-  int rc, new_prio;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &new_prio);
-  TCL_CHECK_MSG(rc, "Priority must be integer");
-  ADLB_curr_priority = new_prio;
   return TCL_OK;
 }
 
@@ -4899,8 +4859,6 @@ static int
 ADLB_Enable_Read_Refcount_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
-  adlb_code rc = ADLB_Read_refcount_enable();
-  TCL_CONDITION(rc == ADLB_SUCCESS, "Unexpected failure");
   return TCL_OK;
 }
 
@@ -5796,21 +5754,6 @@ static int
 ADLB_Add_Debug_Symbol_Cmd(ClientData cdata, Tcl_Interp *interp,
                int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(4);
-
-  int rc;
-  int symbol;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &symbol);
-  TCL_CHECK_MSG(rc, "symbol must be integer");
-  TCL_CONDITION(symbol >= 0, "Symbol must be non-negative");
-
-  const char *name = Tcl_GetString(objv[2]);
-  const char *context = Tcl_GetString(objv[3]);
-  adlb_dsym_data data = { .name = name, .context = context };
-
-  adlb_code ac = ADLB_Add_dsym((uint32_t)symbol, data);
-  TCL_CONDITION(ac == ADLB_SUCCESS, "Error adding debug symbol");
-
   return TCL_OK;
 }
 
@@ -5951,21 +5894,21 @@ tcl_adlb_init(Tcl_Interp* interp)
   COMMAND("declare_struct_type", ADLB_Declare_Struct_Type_Cmd);
   // COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
   COMMAND("server",    ADLB_Server_Cmd);
-  COMMAND("rank",      ADLB_CommRank_Cmd);
+  COMMAND("rank",      ADLB_CommRank_Cmd);	// DISABLED
   // COMMAND("size",      ADLB_CommSize_Cmd);
-  COMMAND("comm_get",  ADLB_CommGet_Cmd);
+  COMMAND("comm_get",  ADLB_CommGet_Cmd);	// DISABLED
   // COMMAND("barrier",   ADLB_Barrier_Cmd);
   // COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   // COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
   COMMAND("amserver",  ADLB_AmServer_Cmd);
-  COMMAND("size",      ADLB_Size_Cmd);
+  COMMAND("size",      ADLB_Size_Cmd);		// DISABLED
   // COMMAND("servers",   ADLB_Servers_Cmd);
   // COMMAND("workers",   ADLB_Workers_Cmd);
   // COMMAND("hostmap_lookup",   ADLB_Hostmap_Lookup_Cmd);
   // COMMAND("hostmap_list",     ADLB_Hostmap_List_Cmd);
-  COMMAND("get_priority",   ADLB_Get_Priority_Cmd);
-  COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);
-  COMMAND("set_priority",   ADLB_Set_Priority_Cmd);
+  COMMAND("get_priority",   ADLB_Get_Priority_Cmd); // DISABLED
+  COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);	// DISABLED
+  COMMAND("set_priority",   ADLB_Set_Priority_Cmd);	// DISABLED
   COMMAND("put",       ADLB_Put_Cmd);
   COMMAND("spawn",     ADLB_Spawn_Cmd);
   // COMMAND("get",       ADLB_Get_Cmd);
@@ -5996,7 +5939,7 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("blob_from_int_list", ADLB_Blob_From_Int_List_Cmd);
   // COMMAND("string2blob", ADLB_String2Blob_Cmd);
   // COMMAND("blob2string", ADLB_Blob2String_Cmd);
-  COMMAND("enable_read_refcount",  ADLB_Enable_Read_Refcount_Cmd);
+  COMMAND("enable_read_refcount",  ADLB_Enable_Read_Refcount_Cmd);	// DISABLED
   // COMMAND("refcount_incr", ADLB_Refcount_Incr_Cmd);
   COMMAND("read_refcount_incr", ADLB_Read_Refcount_Incr_Cmd);
   COMMAND("read_refcount_decr", ADLB_Read_Refcount_Decr_Cmd);
@@ -6023,9 +5966,9 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("struct_create_nested", ADLB_Struct_Create_Nested_Cmd);
   // COMMAND("struct_create_nested_container", ADLB_Struct_Create_Nested_Container_Cmd);
   // COMMAND("struct_create_nested_bag", ADLB_Struct_Create_Nested_Bag_Cmd);
-  COMMAND("xpt_enabled", ADLB_Xpt_Enabled_Cmd);
+  COMMAND("xpt_enabled", ADLB_Xpt_Enabled_Cmd);		// GOOD
   // COMMAND("xpt_init", ADLB_Xpt_Init_Cmd);
-  COMMAND("xpt_finalize", ADLB_Xpt_Finalize_Cmd);
+  COMMAND("xpt_finalize", ADLB_Xpt_Finalize_Cmd);	// GOOD
   // COMMAND("xpt_write", ADLB_Xpt_Write_Cmd);
   // COMMAND("xpt_lookup", ADLB_Xpt_Lookup_Cmd);
   // COMMAND("xpt_pack", ADLB_Xpt_Pack_Cmd);
@@ -6034,7 +5977,7 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("dict_create", ADLB_Dict_Create_Cmd);
   // COMMAND("subscript_struct", ADLB_Subscript_Struct_Cmd);
   // COMMAND("subscript_container", ADLB_Subscript_Container_Cmd);
-  COMMAND("add_debug_symbol", ADLB_Add_Debug_Symbol_Cmd);
+  COMMAND("add_debug_symbol", ADLB_Add_Debug_Symbol_Cmd);	// DISABLED
   // COMMAND("debug_symbol", ADLB_Debug_Symbol_Cmd);
   // COMMAND("fail",      ADLB_Fail_Cmd);
   // COMMAND("abort",     ADLB_Abort_Cmd);
