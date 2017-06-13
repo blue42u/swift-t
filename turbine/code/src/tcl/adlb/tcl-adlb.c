@@ -283,9 +283,6 @@ static int append_subscript(Tcl_Interp *interp,
       adlb_subscript to_append, adlb_buffer *buf);
 
 static int field_name_objs_init(Tcl_Interp *interp, Tcl_Obj *const objv[]);
-static int field_name_objs_add(Tcl_Interp *interp, Tcl_Obj *const objv[],
-      adlb_struct_type type, int field_count,
-      const char *const* field_names);
 static int field_name_objs_finalize(Tcl_Interp *interp,
                                     Tcl_Obj *const objv[]);
 
@@ -508,48 +505,6 @@ static int
 ADLB_Declare_Struct_Type_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(4);
-  int rc;
-  adlb_struct_type type_id;
-  const char *type_name;
-
-  rc = Tcl_GetIntFromObj(interp, objv[1], &type_id);
-  TCL_CHECK(rc);
-
-  type_name = Tcl_GetString(objv[2]);
-
-  Tcl_Obj **field_list;
-  int field_list_len;
-  rc = Tcl_ListObjGetElements(interp, objv[3], &field_list_len, &field_list);
-  TCL_CHECK(rc);
-  int max_field_count = field_list_len / 2;
-  adlb_struct_field_type field_types[max_field_count];
-  const char *field_names[max_field_count];
-
-  int field_count = 0;
-  int field_list_ix = 0;
-  while (field_list_ix < field_list_len)
-  {
-    field_names[field_count] = Tcl_GetString(field_list[field_list_ix++]);
-
-    TCL_CONDITION(field_list_ix < field_list_len, "missing type for "
-                  "field named %s", field_names[field_count]);
-    rc = adlb_type_from_array(interp, objv, field_list, field_list_len,
-                         &field_list_ix, &field_types[field_count].type,
-                         &field_types[field_count].extra);
-    TCL_CHECK(rc);
-    field_count++;
-  }
-
-  adlb_data_code dc = ADLB_Declare_struct_type(type_id, type_name,
-                      field_count, field_types, field_names);
-  TCL_CONDITION(dc == ADLB_DATA_SUCCESS,
-                "Declaring ADLB struct type failed");
-
-
-  rc = field_name_objs_add(interp, objv, type_id, field_count,
-                           field_names);
-  TCL_CHECK(rc);
   return TCL_OK;
 }
 
@@ -589,43 +544,6 @@ static int field_name_objs_init(Tcl_Interp *interp, Tcl_Obj *const objv[])
   for (int i = 0; i < field_name_objs.size; i++)
   {
     field_name_objs.objs[i] = NULL;
-  }
-  return TCL_OK;
-}
-
-static int field_name_objs_add(Tcl_Interp *interp, Tcl_Obj *const objv[],
-    adlb_struct_type type, int field_count,
-    const char *const* field_names)
-{
-  if (field_name_objs.size <= type)
-  {
-    int new_size = field_name_objs.size * 2;
-    if (new_size <= type)
-    {
-      new_size = type;
-    }
-    Tcl_Obj ***tmp = realloc(field_name_objs.objs, (size_t)new_size *
-                                    sizeof(field_name_objs.objs[0]));
-    TCL_MALLOC_CHECK(tmp);
-    // Initialize to NULL
-    for (int i = field_name_objs.size; i < new_size; i++)
-    {
-      tmp[i] = NULL;
-    }
-    field_name_objs.objs = tmp;
-    field_name_objs.size = new_size;
-  }
-
-  field_name_objs.objs[type] = malloc(
-        sizeof(field_name_objs.objs[0][0]) * (size_t)field_count);
-  TCL_MALLOC_CHECK(field_name_objs.objs[type]);
-
-  for (int i = 0; i < field_count; i++)
-  {
-    Tcl_Obj *name_obj = Tcl_NewStringObj(field_names[i], -1);
-    TCL_MALLOC_CHECK(name_obj);
-    field_name_objs.objs[type][i] = name_obj;
-    Tcl_IncrRefCount(name_obj);
   }
   return TCL_OK;
 }
@@ -5893,24 +5811,24 @@ tcl_adlb_init(Tcl_Interp* interp)
 {
   COMMAND("init_comm", ADLB_Init_Comm_Cmd);
   COMMAND("init",      ADLB_Init_Cmd);
-  COMMAND("declare_struct_type", ADLB_Declare_Struct_Type_Cmd);
+  COMMAND("declare_struct_type", ADLB_Declare_Struct_Type_Cmd);		// DISABLED
   // COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
   COMMAND("server",    ADLB_Server_Cmd);
-  COMMAND("rank",      ADLB_CommRank_Cmd);	// DISABLED
+  COMMAND("rank",      ADLB_CommRank_Cmd);				// DISABLED
   // COMMAND("size",      ADLB_CommSize_Cmd);
-  COMMAND("comm_get",  ADLB_CommGet_Cmd);	// DISABLED
+  COMMAND("comm_get",  ADLB_CommGet_Cmd);				// DISABLED
   // COMMAND("barrier",   ADLB_Barrier_Cmd);
   // COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   // COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
   COMMAND("amserver",  ADLB_AmServer_Cmd);
-  COMMAND("size",      ADLB_Size_Cmd);		// DISABLED
+  COMMAND("size",      ADLB_Size_Cmd);					// DISABLED
   // COMMAND("servers",   ADLB_Servers_Cmd);
   // COMMAND("workers",   ADLB_Workers_Cmd);
   // COMMAND("hostmap_lookup",   ADLB_Hostmap_Lookup_Cmd);
   // COMMAND("hostmap_list",     ADLB_Hostmap_List_Cmd);
-  COMMAND("get_priority",   ADLB_Get_Priority_Cmd); // DISABLED
-  COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);	// DISABLED
-  COMMAND("set_priority",   ADLB_Set_Priority_Cmd);	// DISABLED
+  COMMAND("get_priority",   ADLB_Get_Priority_Cmd); 			// DISABLED
+  COMMAND("reset_priority", ADLB_Reset_Priority_Cmd);			// DISABLED
+  COMMAND("set_priority",   ADLB_Set_Priority_Cmd);			// DISABLED
   COMMAND("put",       ADLB_Put_Cmd);
   COMMAND("spawn",     ADLB_Spawn_Cmd);
   // COMMAND("get",       ADLB_Get_Cmd);
@@ -5968,9 +5886,9 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("struct_create_nested", ADLB_Struct_Create_Nested_Cmd);
   // COMMAND("struct_create_nested_container", ADLB_Struct_Create_Nested_Container_Cmd);
   // COMMAND("struct_create_nested_bag", ADLB_Struct_Create_Nested_Bag_Cmd);
-  COMMAND("xpt_enabled", ADLB_Xpt_Enabled_Cmd);		// GOOD
+  COMMAND("xpt_enabled", ADLB_Xpt_Enabled_Cmd);				// GOOD
   // COMMAND("xpt_init", ADLB_Xpt_Init_Cmd);
-  COMMAND("xpt_finalize", ADLB_Xpt_Finalize_Cmd);	// GOOD
+  COMMAND("xpt_finalize", ADLB_Xpt_Finalize_Cmd);			// GOOD
   // COMMAND("xpt_write", ADLB_Xpt_Write_Cmd);
   // COMMAND("xpt_lookup", ADLB_Xpt_Lookup_Cmd);
   // COMMAND("xpt_pack", ADLB_Xpt_Pack_Cmd);
@@ -5979,7 +5897,7 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("dict_create", ADLB_Dict_Create_Cmd);
   // COMMAND("subscript_struct", ADLB_Subscript_Struct_Cmd);
   // COMMAND("subscript_container", ADLB_Subscript_Container_Cmd);
-  COMMAND("add_debug_symbol", ADLB_Add_Debug_Symbol_Cmd);	// DISABLED
+  COMMAND("add_debug_symbol", ADLB_Add_Debug_Symbol_Cmd);		// DISABLED
   // COMMAND("debug_symbol", ADLB_Debug_Symbol_Cmd);
   // COMMAND("fail",      ADLB_Fail_Cmd);
   // COMMAND("abort",     ADLB_Abort_Cmd);

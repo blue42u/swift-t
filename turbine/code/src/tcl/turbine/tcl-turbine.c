@@ -1666,32 +1666,32 @@ Tclturbine_Init(Tcl_Interp* interp)
 
   COMMAND("init",        Turbine_Init_Cmd);
   COMMAND("init_debug",  Turbine_Init_Debug_Cmd);
-  COMMAND("version",     Turbine_Version_Cmd);	// GOOD
+  COMMAND("version",     Turbine_Version_Cmd);			// GOOD
   COMMAND("rule",        Turbine_Rule_Cmd);
   // COMMAND("ruleopts",    Turbine_RuleOpts_Cmd);
-  COMMAND("log",         Turbine_Log_Cmd);	// GOOD
-  COMMAND("normalize",   Turbine_Normalize_Cmd);	// GOOD
+  COMMAND("log",         Turbine_Log_Cmd);			// GOOD
+  COMMAND("normalize",   Turbine_Normalize_Cmd);		// GOOD
   COMMAND("worker_loop", Turbine_Worker_Loop_Cmd);
-  COMMAND("cache_check", Turbine_Cache_Check_Cmd);	// DISABLED
+  COMMAND("cache_check", Turbine_Cache_Check_Cmd);		// DISABLED
   // COMMAND("cache_retrieve", Turbine_Cache_Retrieve_Cmd);
-  COMMAND("cache_store", Turbine_Cache_Store_Cmd);	// DISABLED
+  COMMAND("cache_store", Turbine_Cache_Store_Cmd);		// DISABLED
   // COMMAND("task_comm",   Turbine_TaskComm_Cmd);
   COMMAND("finalize",    Turbine_Finalize_Cmd);
   // COMMAND("debug_on",    Turbine_Debug_On_Cmd);
-  COMMAND("debug",       Turbine_Debug_Cmd);	// GOOD
+  COMMAND("debug",       Turbine_Debug_Cmd);			// GOOD
   // COMMAND("toint_impl", Turbine_ToIntImpl_Cmd);
-  COMMAND("parse_int_impl", Turbine_ParseIntImpl_Cmd);	// GOOD (I think)
+  COMMAND("parse_int_impl", Turbine_ParseIntImpl_Cmd);		// GOOD (I think)
 
   // COMMAND("sync_exec", Sync_Exec_Cmd);
 
-  COMMAND("async_exec_names", Async_Exec_Names_Cmd);	// DISABLED
+  COMMAND("async_exec_names", Async_Exec_Names_Cmd);		// DISABLED
   // COMMAND("async_exec_configure", Async_Exec_Configure_Cmd);
   // COMMAND("async_exec_worker_loop", Async_Exec_Worker_Loop_Cmd);
 
   COMMAND("noop_exec_register", Noop_Exec_Register_Cmd);	// DISABLED
   // COMMAND("noop_exec_run", Noop_Exec_Run_Cmd);
 
-  COMMAND("coaster_register", Coaster_Register_Cmd);	// DISABLED
+  COMMAND("coaster_register", Coaster_Register_Cmd);		// DISABLED
   // COMMAND("coaster_run", Coaster_Run_Cmd);
 
   // COMMAND("bcast",   Turbine_Bcast_Cmd);
