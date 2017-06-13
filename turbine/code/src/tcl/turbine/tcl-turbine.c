@@ -96,26 +96,6 @@ Turbine_ParseInt_Impl(ClientData cdata, Tcl_Interp *interp,
                   Tcl_Obj *const objv[], Tcl_Obj *obj, int base);
 
 /**
-   @see TURBINE_CHECK
-*/
-/*static void
-turbine_check_failed(Tcl_Interp* interp, turbine_code code,
-                     char* format, ...)
-{
-  char buffer[1024];
-  char* p = &buffer[0];
-  va_list ap;
-  va_start(ap, format);
-  append(p, "\n");
-  p += vsprintf(p, format, ap);
-  va_end(ap);
-  append(p, "\n%s", "turbine error: ");
-  turbine_code_tostring(p, code);
-  printf("turbine_check_failed: %s\n", buffer);
-  Tcl_AddErrorInfo(interp, buffer);
-}*/
-
-/**
    If code is not SUCCESS, return a Tcl error that includes the
    string representation of code
    @note Assumes @code Tcl_Interp* interp @endcode is in scope
@@ -464,22 +444,6 @@ rule_set_name_default(char* name, int size, const char* action)
   }
 }
 
-/*static int
-Turbine_RuleOpts_Cmd(ClientData cdata, Tcl_Interp* interp,
-                     int objc, Tcl_Obj *const objv[])
-{
-  int name_buf_size = 128;
-  char t[name_buf_size];
-  struct rule_opts opts;
-  opts.name = NULL;
-
-  const char *action = "dummy action";
-  // User gave us a list of optional args
-  rule_opts_from_list(interp, objv, &opts, objv + 1, objc - 1,
-                      t, name_buf_size, action);
-  return TCL_OK;
-}*/
-
 static inline int
 rule_opt_from_kv(Tcl_Interp* interp, Tcl_Obj *const objv[],
             struct rule_opts* opts, Tcl_Obj* key, Tcl_Obj* val);
@@ -629,41 +593,6 @@ Turbine_Cache_Check_Cmd(ClientData cdata, Tcl_Interp *interp,
   return TCL_OK;
 }
 
-/*static int
-Turbine_Cache_Retrieve_Cmd(ClientData cdata, Tcl_Interp *interp,
-                   int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(2);
-  turbine_datum_id td;
-  const char *subscript;
-  size_t subscript_len;
-  int error = ADLB_EXTRACT_HANDLE(objv[1], &td, &subscript,
-                                  &subscript_len);
-  TCL_CHECK(error);
-
-  // TODO: handle caching subscripts
-  TCL_CONDITION(subscript_len == 0, "Don't handle caching subscripts");
-
-  turbine_type type;
-  void* data;
-  size_t length;
-  turbine_code rc = turbine_cache_retrieve(td, &type, &data, &length);
-  TURBINE_CHECK(rc, "cache retrieve failed: %"PRId64"", td);
-
-  Tcl_Obj* result = NULL;
-  int tcl_code = adlb_datum2tclobj(interp, objv, td, type,
-                      ADLB_TYPE_EXTRA_NULL, data, length, &result);
-  TCL_CHECK(tcl_code);
-  Tcl_SetObjResult(interp, result);
-  return TCL_OK;
-}*/
-
-/*static int
-turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
-               turbine_datum_id td, turbine_type type,
-               adlb_type_extra extra, Tcl_Obj* obj,
-               bool canonicalize, void** result, size_t* length);*/
-
 /**
    usage turbine::cache_store $td $type [ extra type info ] $value
  */
@@ -673,33 +602,6 @@ Turbine_Cache_Store_Cmd(ClientData cdata, Tcl_Interp* interp,
 {
   return TCL_OK;
 }
-
-// Allocate a binary buffer and serialize a tcl object into it
-//  for the specified ADLB type
-/*static int
-turbine_tclobj2bin(Tcl_Interp* interp, Tcl_Obj *const objv[],
-               turbine_datum_id td, turbine_type type,
-               adlb_type_extra extra, Tcl_Obj* obj,
-               bool canonicalize, void** result, size_t* length)
-{
-  adlb_binary_data data;
-
-  int rc = adlb_tclobj2bin(interp, objv, type, extra, obj, canonicalize,
-                          NULL, &data);
-  TCL_CHECK_MSG(rc, "failed serializing tcl object to ADLB <%"PRId64">: "
-                "\"%s\"", td, Tcl_GetString(obj));
-
-  // Ensure we have ownership of a malloced buffer with the data
-  adlb_data_code dc  = ADLB_Own_data(NULL, &data);
-
-  TCL_CONDITION(dc == ADLB_DATA_SUCCESS, "allocating binary buffer for "
-        "<%"PRId64"> failed: %s", td, Tcl_GetString(obj));
-
-  assert(data.caller_data != NULL);
-  *result = data.caller_data;
-  *length = data.length;
-  return TCL_OK;
-}*/
 
 /* usage: worker_loop <work type> [<keyword arg dict>]
    Repeatedly run units of work from ADLB of provided type
@@ -797,16 +699,6 @@ worker_keyword_args(Tcl_Interp *interp, Tcl_Obj *const objv[],
   return TCL_OK;
 }
 
-/*int
-Turbine_TaskComm_Cmd(ClientData cdata, Tcl_Interp *interp,
-                     int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(1);
-  Tcl_Obj* result = Tcl_NewLongObj(turbine_task_comm);
-  Tcl_SetObjResult(interp, result);
-  return TCL_OK;
-}*/
-
 static int
 Turbine_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[])
@@ -814,16 +706,6 @@ Turbine_Finalize_Cmd(ClientData cdata, Tcl_Interp *interp,
   turbine_finalize(interp);
   return TCL_OK;
 }
-
-/*static int
-Turbine_Debug_On_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(1);
-  bool enabled = turbine_debug_enabled;
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(enabled));
-  return TCL_OK;
-}*/
 
 static int
 Turbine_Debug_Cmd(ClientData cdata, Tcl_Interp *interp,
@@ -838,19 +720,6 @@ Turbine_Debug_Cmd(ClientData cdata, Tcl_Interp *interp,
   }
   return TCL_OK;
 }
-
-/*
-  turbine::toint_impl <string>
-  Convert decimal string to wide integer
- */
-/*static int
-Turbine_ToIntImpl_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(2);
-
-  return Turbine_ParseInt_Impl(cdata, interp, objv, objv[1], 10);
-}*/
 
 /*
   turbine::parse_int_impl <string> <base>
@@ -941,124 +810,6 @@ Turbine_ParseInt_Impl(ClientData cdata, Tcl_Interp *interp,
   Tcl_SetObjResult(interp, Tcl_NewWideIntObj(val));
   return TCL_OK;
 }
-
-/*static void
-redirect_error_exit(const char *file, const char *purpose)
-{
-  fprintf(stderr, "error opening %s for %s: %s\n", file, purpose,
-          strerror(errno));
-  exit(1);
-}
-
-static void
-dup2_error_exit(const char *purpose)
-{
-  fprintf(stderr, "error duplicating file for %s: %s\n", purpose,
-          strerror(errno));
-  exit(1);
-}
-
-static void
-close_error_exit(const char *purpose)
-{
-  fprintf(stderr, "error closing file for %s: %s\n", purpose,
-          strerror(errno));
-  exit(1);
-}*/
-
-/*static int
-Sync_Exec_Cmd(ClientData cdata, Tcl_Interp *interp,
-              int objc, Tcl_Obj *const objv[])
-{
-  int rc;
-  TCL_CONDITION(objc >= 5, "Requires at least 4 arguments");
-
-  const char *stdin_file = Tcl_GetString(objv[1]);
-  const char *stdout_file = Tcl_GetString(objv[2]);
-  const char *stderr_file = Tcl_GetString(objv[3]);
-
-  char *cmd = Tcl_GetString(objv[4]);
-
-  int cmd_offset = 4;
-  int cmd_argc = objc - cmd_offset;
-  char *cmd_argv[cmd_argc + 1];
-  cmd_argv[0] = cmd;
-  for (int i = 1; i < cmd_argc; i++)
-    cmd_argv[i] = Tcl_GetString(objv[i + cmd_offset]);
-  cmd_argv[cmd_argc] = NULL; // Need to NULL-terminate for execvp()
-
-  pid_t child = fork();
-  TCL_CONDITION(child >= 0, "Error forking: %s", strerror(errno));
-  if (child == 0)
-  {
-    // Setup redirects
-    if (stdin_file[0] != '\0')
-    {
-      int in_fd = open(stdin_file, O_RDONLY);
-      if (in_fd == -1) redirect_error_exit(stdin_file, "input redirection");
-
-      rc = dup2(in_fd, 0);
-      if (rc == -1) dup2_error_exit("input redirection");
-
-      rc = close(in_fd);
-      if (rc == -1) close_error_exit("input redirection");
-    }
-
-    if (stdout_file[0] != '\0')
-    {
-      int out_fd = open(stdout_file, O_WRONLY | O_TRUNC | O_CREAT, 0666);
-      if (out_fd == -1) redirect_error_exit(stdin_file, "output redirection");
-
-      rc = dup2(out_fd, 1);
-      if (rc == -1) dup2_error_exit("output redirection");
-
-      rc = close(out_fd);
-      if (rc == -1) close_error_exit("output redirection");
-    }
-
-    if (stderr_file[0] != '\0')
-    {
-      int err_fd = open(stderr_file, O_WRONLY | O_TRUNC | O_CREAT, 0666);
-      if (err_fd == -1) redirect_error_exit(stdin_file, "output redirection");
-
-      rc = dup2(err_fd, 2);
-      if (rc == -1) dup2_error_exit("output redirection");
-
-      rc = close(err_fd);
-      if (rc == -1) close_error_exit("output redirection");
-    }
-
-    rc = execvp(cmd, cmd_argv);
-    TCL_CONDITION(rc != -1, "Error executing command %s: %s", cmd,
-                  strerror(errno));
-  }
-
-  int status;
-  waitpid(child, &status, 0);
-  int exitcode = WEXITSTATUS(status);
-
-  if (exitcode != 0)
-  {
-    if (tcl_version > 8.5)
-    {
-      Tcl_Obj *msgs[1] = {
-        Tcl_ObjPrintf("shell: Command failed with exit code: %i",
-                      exitcode)
-      };
-      return turbine_user_error(interp, 1, msgs);
-    }
-    else
-    {
-      // Tcl 8.5
-      char t[128];
-      sprintf(t, "shell: Command failed with exit code: %i", exitcode);
-      Tcl_AddErrorInfo(interp, t);
-      return TCL_ERROR;
-    }
-  }
-
-  return TCL_OK;
-}*/
 
 /*
   Extract IDs and ID/Sub pairs
@@ -1166,290 +917,6 @@ Async_Exec_Names_Cmd(ClientData cdata, Tcl_Interp* interp,
   Tcl_SetObjResult(interp, Tcl_NewListObj(0, NULL));
   return TCL_OK;
 }
-
-/* usage: async_exec_configure <executor name> <config string>
-   Configure registered executor.
- */
-/*static int
-Async_Exec_Configure_Cmd(ClientData cdata, Tcl_Interp* interp,
-                        int objc, Tcl_Obj* const objv[])
-{
-  TCL_ARGS(3);
-
-  turbine_code tc;
-
-  const char *exec_name = Tcl_GetString(objv[1]);
-  int config_len;
-  const char *config = Tcl_GetStringFromObj(objv[2], &config_len);
-
-  turbine_executor *exec = turbine_get_async_exec(exec_name, NULL);
-  TCL_CONDITION(exec != NULL, "Executor %s not registered", exec_name);
-
-  tc = turbine_configure_exec(interp, exec, config, (size_t)config_len);
-  TCL_CONDITION(tc == TURBINE_SUCCESS,
-      "Could not configure executor %s", exec_name);
-
-  return TCL_OK;
-}*/
-
-/*
-  turbine::async_exec_worker_loop <executor name> <adlb work type>
-                                  [<keyword arg dict>]
-  Optional key-value arguments:
-    buffer_count: number of payload buffers to allocate
-    buffer_size: size of payload buffers in bytes (must be large enough
-                                                   for work units)
- */
-/*static int
-Async_Exec_Worker_Loop_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  TCL_CONDITION(objc == 3 || objc == 4, "Need 2 or 3 arguments");
-
-  int rc;
-  turbine_code tc;
-
-  adlb_payload_buf *bufs = NULL;
-
-  const char *exec_name = Tcl_GetString(objv[1]);
-
-  turbine_executor *exec = turbine_get_async_exec(exec_name, NULL);
-  TCL_CONDITION(exec != NULL, "Executor %s not registered", exec_name);
-
-  int adlb_work_type;
-  rc = Tcl_GetIntFromObj(interp, objv[2], &adlb_work_type);
-  TCL_CHECK(rc);
-
-  int buffer_count = TURBINE_ASYNC_EXEC_DEFAULT_BUFFER_COUNT;
-  int buffer_size = TURBINE_ASYNC_EXEC_DEFAULT_BUFFER_SIZE;
-
-  if (objc >= 4)
-  {
-    DEBUG_TURBINE("Keyword args for %s: %s", exec_name,
-                  Tcl_GetString(objv[3]));
-    rc = worker_keyword_args(interp, objv, objv[3], &buffer_count,
-                             &buffer_size);
-    TCL_CHECK(rc);
-  }
-
-  DEBUG_TURBINE("Allocating %i buffers of %i bytes each for %s",
-                buffer_count, buffer_size, exec_name);
-
-  int max_slots;
-  tc = turbine_async_exec_max_slots(interp, exec, &max_slots);
-  TCL_CONDITION(tc == TURBINE_SUCCESS, "Executor error in %s getting "
-                                       "max slots!", exec_name);
-
-  // Only allocate as many buffers as can be used
-  if (max_slots >= 1 && max_slots < buffer_count) {
-    buffer_count = max_slots;
-  }
-
-  bufs = malloc(sizeof(adlb_payload_buf) *
-                                  (size_t)buffer_count);
-  TCL_MALLOC_CHECK(bufs);
-
-  // Initialize to allow cleanup
-  for (int i = 0; i < buffer_count; i++)
-  {
-    bufs[i].payload = NULL;
-  }
-
-  for (int i = 0; i < buffer_count; i++)
-  {
-    // Maintain separate buffers from xfer, since xfer may be
-    // used in code that we call.
-
-    bufs[i].payload = malloc((size_t)buffer_size);
-    TCL_MALLOC_CHECK_GOTO(bufs[i].payload, cleanup);
-    bufs[i].size = buffer_size;
-  }
-
-  tc = turbine_async_worker_loop(interp, exec, adlb_work_type,
-                                  bufs, buffer_count);
-
-  if (tc == TURBINE_ERROR_EXTERNAL)
-  {
-    // turbine_async_worker_loop() has added the error info
-   rc = TCL_ERROR;
-   goto cleanup;
-  }
-  else
-  {
-    TCL_CONDITION_GOTO(tc == TURBINE_SUCCESS, cleanup,
-                       "Unknown worker error!");
-  }
-
-  rc = TCL_OK;
-cleanup:
-  if (bufs != NULL)
-  {
-    for (int i = 0; i < buffer_count; i++)
-    {
-      free(bufs[i].payload);
-    }
-    free(bufs);
-  }
-
-  return rc;
-}*/
-
-/*
-  turbine::noop_exec_run <work string> [<success callback>]
-                         [<failure callback>]
- */
-/*static int
-Noop_Exec_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  TCL_CONDITION(objc >= 2 && objc <= 4, "Wrong # args");
-  turbine_code tc;
-
-  bool started;
-  const turbine_executor *noop_exec;
-  noop_exec = turbine_get_async_exec(NOOP_EXECUTOR_NAME, &started);
-  TCL_CONDITION(noop_exec != NULL, "Noop executor not registered");
-  TCL_CONDITION(started, "Noop executor not started");
-
-  char *str;
-  int len;
-  str = Tcl_GetStringFromObj(objv[1], &len);
-
-  turbine_task_callbacks callbacks;
-  callbacks.success.code = NULL;
-  callbacks.failure.code = NULL;
-
-  if (objc >= 3)
-  {
-    callbacks.success.code = objv[2];
-  }
-
-  if (objc >= 4)
-  {
-    callbacks.failure.code = objv[3];
-  }
-
-  tc = noop_execute(interp, noop_exec, str, len, callbacks);
-  TCL_CONDITION(tc == TURBINE_SUCCESS, "Error executing noop task");
-
-  return TCL_OK;
-}*/
-
-/*
-  turbine::coaster_run <executable> <argument list> <infiles>
-              <outfiles> <options dict>
-              <success callback> <failure callback>
-  options dict: optional arguments. Valid keys are:
-    stdin/stdout/stderr: redirect output
-    job_manager: coaster job manager to use,
-                  e.g. "local:slurm" or "local:local"
-    staging_mode: staging mode to use
-              ("always", "if_present", "on_error", "on_success")
- */
-/*static int
-Coaster_Run_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-#if HAVE_COASTER == 0
-  TCL_CONDITION(false, "Coaster extension not enabled");
-  return TCL_ERROR;
-#else
-  TCL_CONDITION(objc == 8, "Wrong # args: %i", objc - 1);
-  turbine_code tc;
-  int rc;
-
-  const turbine_executor *coaster_exec;
-  bool started;
-  coaster_exec = turbine_get_async_exec(COASTER_EXECUTOR_NAME, &started);
-  TCL_CONDITION(coaster_exec != NULL, "Coaster executor not registered");
-  TCL_CONDITION(started, "Coaster executor not started");
-  const char *executable;
-  int executable_len;
-  executable = Tcl_GetStringFromObj(objv[1], &executable_len);
-
-  int argc, stageinc, stageoutc;
-  const char **argv;
-  size_t *arg_lens;
-  coaster_stage_entry *stageins, *stageouts;
-
-  rc = turbine_tcllist_to_strings(interp, objv, objv[2], &argc, &argv, &arg_lens);
-  TCL_CHECK(rc);
-
-  const char *stdin_s = NULL, *stdout_s = NULL, *stderr_s = NULL;
-  size_t stdin_slen = 0, stdout_slen = 0, stderr_slen = 0;
-
-  const char *job_manager;
-  size_t job_manager_len;
-  tc = coaster_default_job_manager(coaster_exec, &job_manager,
-                                   &job_manager_len);
-  TCL_CONDITION(tc == TURBINE_SUCCESS, "Error getting coaster default "
-                                       "job manager");
-
-  coaster_staging_mode staging_mode = COASTER_DEFAULT_STAGING_MODE;
-
-  rc = parse_coaster_opts(interp, objv, objv[5], &stdin_s, &stdin_slen,
-            &stdout_s, &stdout_slen, &stderr_s, &stderr_slen,
-            &job_manager, &job_manager_len, &staging_mode);
-  TCL_CHECK(rc);
-
-  // Parse stages after we know staging mode
-  rc = parse_coaster_stages(interp, objv, objv[3], staging_mode,
-                    &stageinc, &stageins);
-  TCL_CHECK(rc);
-
-  rc = parse_coaster_stages(interp, objv, objv[4], staging_mode,
-                    &stageoutc, &stageouts);
-  TCL_CHECK(rc);
-
-  turbine_task_callbacks callbacks;
-  callbacks.success.code = objv[6];
-  callbacks.failure.code = objv[7];
-
-  coaster_job *job;
-  coaster_rc crc;
-
-  DEBUG_COASTER("Coaster jobManager: %.*s", (int)job_manager_len,
-                 job_manager);
-  crc = coaster_job_create(executable, (size_t)executable_len, argc,
-                argv, arg_lens, job_manager, job_manager_len, &job);
-  TCL_CONDITION(crc == COASTER_SUCCESS, "Error constructing coaster job: "
-                "%s", coaster_last_err_info());
-
-  if (stageinc > 0 || stageoutc > 0)
-  {
-    crc = coaster_job_add_stages(job, stageinc, stageins,
-                                stageoutc, stageouts);
-    TCL_CONDITION(crc == COASTER_SUCCESS, "Error adding coaster stages: "
-                "%s", coaster_last_err_info());
-  }
-
-  if (stdin_s != NULL || stdout_s != NULL || stderr_s != NULL)
-  {
-    crc = coaster_job_set_redirects(job, stdin_s, stdin_slen,
-                stdout_s, stdout_slen, stderr_s, stderr_slen);
-    TCL_CONDITION(crc == COASTER_SUCCESS, "Error adding coaster stages: "
-                "%s", coaster_last_err_info())
-
-  }
-
-  // Cleanup memory before execution
-  void *alloced[] = {argv, arg_lens, stageins, stageouts};
-  int alloced_count = (int)(sizeof(alloced) / sizeof(alloced[0]));
-
-  for (int i = 0; i < alloced_count; i++)
-  {
-    if (alloced[i] != NULL)
-    {
-      free(alloced[i]);
-    }
-  }
-
-  tc = coaster_execute(interp, coaster_exec, job, callbacks);
-  TCL_CONDITION(tc == TURBINE_SUCCESS, "Error executing coaster task");
-
-  return TCL_OK;
-#endif
-}*/
 
 int turbine_tcllist_to_strings(Tcl_Interp *interp, Tcl_Obj *const objv[],
       Tcl_Obj *list, int *count, const char ***strs, size_t **str_lens)
@@ -1591,57 +1058,6 @@ static int parse_coaster_opts(Tcl_Interp *interp, Tcl_Obj *const objv[],
   return TCL_OK;
 }
 #endif
-
-/*static int
-Turbine_CopyTo_Cmd(ClientData cdata, Tcl_Interp *interp,
-                   int objc, Tcl_Obj *const objv[])
-{
-  TCL_ARGS(4);
-  int comm_int;
-  int rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[1]));
-  const char* name_in  = Tcl_GetString(objv[2]);
-  const char* name_out = Tcl_GetString(objv[3]);
-
-  MPI_Comm comm = (MPI_Comm) comm_int;
-  bool result = turbine_io_copy_to(comm, name_in, name_out);
-  TCL_CONDITION(result, "Could not copy: %s to %s",
-                name_in, name_out);
-  return TCL_OK;
-}*/
-
-/*static int
-Turbine_Bcast_Cmd(ClientData cdata, Tcl_Interp *interp,
-                  int objc, Tcl_Obj *const objv[])
-{
-  // Unpack
-  TCL_ARGS(4);
-  int rc;
-  int comm_int;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &comm_int);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[1]));
-  int root;
-  rc = Tcl_GetIntFromObj(interp, objv[2], &root);
-  TCL_CHECK_MSG(rc, "Not an integer: %s", Tcl_GetString(objv[2]));
-  MPI_Comm comm = (MPI_Comm) comm_int;
-  char* name  = Tcl_GetString(objv[3]);
-
-  // Switch on bcast root
-  char* s;
-  int rank;
-  MPI_Comm_rank(comm, &rank);
-  if (rank == root)
-    s = (char*) Tcl_GetVar(interp, name, EMPTY_FLAG);
-
-  // Execute
-  int length;
-  turbine_io_bcast(comm, &s, &length);
-
-  // Return
-  if (rank != root)
-    Tcl_SetVar(interp, name, s, EMPTY_FLAG);
-  return TCL_OK;
-}*/
 
 /**
    Called when Tcl loads this extension
