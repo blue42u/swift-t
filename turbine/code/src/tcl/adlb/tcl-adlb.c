@@ -348,21 +348,6 @@ static int
 ADLB_Init_Comm_Cmd(ClientData cdata, Tcl_Interp *interp,
                    int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(objc == 1 || objc == 2, "requires 0 or 1 arguments!");
-  int rc;
-
-  MPI_Comm *adlb_comm_ptr = NULL;
-  if (objc == 2)
-  {
-    long tmp_ptr = 0;
-    rc = Tcl_GetLongFromObj(interp, objv[1], &tmp_ptr);
-    TCL_CHECK(rc);
-    adlb_comm_ptr = (MPI_Comm*)tmp_ptr;
-  }
-
-  rc = adlb_setup_comm(interp, objv, adlb_comm_ptr);
-  TCL_CHECK(rc);
-
   return TCL_OK;
 }
 
@@ -413,80 +398,6 @@ static int
 ADLB_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(objc == 3 || objc == 4, "requires 2 or 3 arguments!");
-  TCL_CONDITION(!adlb_init, "ADLB already initialized");
-
-  mm_init();
-  turbine_debug_init();
-
-  int rc;
-
-  int servers;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &servers);
-  TCL_CHECK(rc);
-
-  int ntypes;
-  rc = Tcl_GetIntFromObj(interp, objv[2], &ntypes);
-  TCL_CHECK(rc);
-
-  int type_vect[ntypes];
-  for (int i = 0; i < ntypes; i++)
-    type_vect[i] = i;
-
-  bool ok = table_bp_init(&blob_cache, 16);
-  TCL_CONDITION(ok, "Could not initialize blob cache");
-
-  rc = field_name_objs_init(interp, objv);
-  TCL_CHECK(rc);
-
-  MPI_Comm *adlb_comm_ptr = NULL;
-  if (objc == 4)
-  {
-    long tmp_comm_ptr = 0;
-    rc = Tcl_GetLongFromObj(interp, objv[3], &tmp_comm_ptr);
-    TCL_CHECK(rc);
-    adlb_comm_ptr = (MPI_Comm *) tmp_comm_ptr;
-  }
-
-  if (!adlb_comm_init)
-  {
-    rc = adlb_setup_comm(interp, objv, adlb_comm_ptr);
-    TCL_CHECK(rc);
-  }
-
-  int workers = adlb_comm_size - servers;
-  if (adlb_comm_rank == 0)
-  {
-    if (workers <= 0)
-      puts("WARNING: No workers");
-    // Other configuration information will go here...
-  }
-
-  // ADLB_Init(int num_servers, int use_debug_server,
-  //           int aprintf_flag, int num_types, int *types,
-  //           int *am_server, int *am_debug_server, MPI_Comm *app_comm)
-#ifdef USE_ADLB
-  rc = ADLB_Init(servers, 0, 0, ntypes, type_vect,
-               &am_server, &am_debug_server, &adlb_worker_comm);
-#endif
-#ifdef USE_XLB
-  rc = ADLB_Init(servers, ntypes, type_vect,
-                 &am_server, adlb_comm, &adlb_worker_comm);
-#endif
-  if (rc != ADLB_SUCCESS)
-    return TCL_ERROR;
-
-  if (! am_server)
-    MPI_Comm_rank(adlb_worker_comm, &adlb_worker_comm_rank);
-
-  // Set static variables
-  adlb_workers = workers;
-  adlb_servers = servers;
-
-  set_namespace_constants(interp);
-
-  adlb_init = true;
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(ADLB_SUCCESS));
   return TCL_OK;
 }
 
@@ -568,26 +479,6 @@ static int
 ADLB_Server_Cmd(ClientData cdata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(adlb_init, "ADLB not initialized");
-  if (!am_server)
-  {
-    printf("adlb::server: This process is not a server!\n");
-    return TCL_ERROR;
-  }
-
-  DEBUG_ADLB("ADLB SERVER...");
-  // Limit ADLB to 100MB
-  int max_memory = 100*1024*1024;
-#ifdef USE_ADLB
-  double logging = 0.0;
-  int rc = ADLB_Server(max_memory, logging);
-#endif
-#ifdef USE_XLB
-  int rc = ADLB_Server(max_memory);
-#endif
-
-  TCL_CONDITION(rc == ADLB_SUCCESS, "SERVER FAILED");
-
   return TCL_OK;
 }
 
@@ -618,8 +509,7 @@ static int
 ADLB_AmServer_Cmd(ClientData cdata, Tcl_Interp *interp,
                   int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(adlb_init, "ADLB not initialized");
-  Tcl_SetObjResult(interp, Tcl_NewBooleanObj(am_server));
+  Tcl_SetObjResult(interp, Tcl_NewBooleanObj(0));
   return TCL_OK;
 }
 
@@ -967,15 +857,21 @@ ADLB_Multicreate_Cmd(ClientData cdata, Tcl_Interp *interp,
     TCL_CHECK(rc);
   }
 
-  rc = ADLB_Multicreate(specs, count);
-  TCL_CONDITION(rc == ADLB_SUCCESS, "failed!");
-
   // Build list to return
-  Tcl_Obj *tcl_ids[count];
+  Tcl_Obj *results[count];
   for (int i = 0; i < count; i++) {
-    tcl_ids[i] = Tcl_NewADLB_ID(specs[i].id);
+    xtask_aftern_t* to_sig = malloc(cs.props.read_refcount*sizeof(xtask_aftern_t));
+
+    D_Var v = malloc(sizeof(D_Var));
+    ADLB_create_spec cs = specs[i];
+    *v = (D_Var){
+      xtask_aftern_create(cs.props.read_refcount + cs.props.write_refcount,
+        &(xtask_task_t){ sig_all, to_sig, NULL }),
+      to_sig,
+      
+    };
   }
-  Tcl_SetObjResult(interp, Tcl_NewListObj(count, tcl_ids));
+  Tcl_SetObjResult(interp, Tcl_NewListObj(count, results));
   return TCL_OK;
 }
 
@@ -3512,18 +3408,18 @@ Tcladlb_Init(Tcl_Interp* interp)
 void
 tcl_adlb_init(Tcl_Interp* interp)
 {
-  COMMAND("init_comm", ADLB_Init_Comm_Cmd);
-  COMMAND("init",      ADLB_Init_Cmd);
+  COMMAND("init_comm", ADLB_Init_Comm_Cmd);				// DISABLED
+  COMMAND("init",      ADLB_Init_Cmd);					// DISABLED
   COMMAND("declare_struct_type", ADLB_Declare_Struct_Type_Cmd);		// DISABLED
   // COMMAND("is_struct_type", ADLB_Is_Struct_Type_Cmd);
-  COMMAND("server",    ADLB_Server_Cmd);
+  COMMAND("server",    ADLB_Server_Cmd);				// DISABLED
   COMMAND("rank",      ADLB_CommRank_Cmd);				// DISABLED
   // COMMAND("size",      ADLB_CommSize_Cmd);
   COMMAND("comm_get",  ADLB_CommGet_Cmd);				// DISABLED
   // COMMAND("barrier",   ADLB_Barrier_Cmd);
   // COMMAND("worker_barrier", ADLB_Worker_Barrier_Cmd);
   // COMMAND("worker_rank", ADLB_Worker_Rank_Cmd);
-  COMMAND("amserver",  ADLB_AmServer_Cmd);
+  COMMAND("amserver",  ADLB_AmServer_Cmd);				// DISABLED
   COMMAND("size",      ADLB_Size_Cmd);					// DISABLED
   // COMMAND("servers",   ADLB_Servers_Cmd);
   // COMMAND("workers",   ADLB_Workers_Cmd);
