@@ -156,28 +156,6 @@ static int
 Turbine_Init_Cmd(ClientData cdata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-  TCL_ARGS(4);
-  int amserver, rank, size;
-
-  get_tcl_version();
-
-  int rc;
-  rc = Tcl_GetIntFromObj(interp, objv[1], &amserver);
-  TCL_CHECK(rc);
-  rc = Tcl_GetIntFromObj(interp, objv[2], &rank);
-  TCL_CHECK(rc);
-  rc = Tcl_GetIntFromObj(interp, objv[3], &size);
-  TCL_CHECK(rc);
-
-  turbine_code code = turbine_init(amserver, rank, size);
-  if (code != TURBINE_SUCCESS)
-  {
-    Tcl_AddErrorInfo(interp, " Could not initialize Turbine!\n");
-    return TCL_ERROR;
-  }
-
-  log_setup(rank);
-
   return TCL_OK;
 }
 

@@ -18,6 +18,19 @@
 #define TCL_ADLB_H
 
 #include <tcl.h>
+#include <xtask_api.h>
+
+typedef struct {
+  xtask_aftern_t aftern;
+  int count;
+  xtask_aftern_t* ans;
+  adlb_data_type type;
+  union {
+    int Integer;
+    float Float;
+    char* String;
+  };
+} D_Var;
 
 void tcl_adlb_init(Tcl_Interp* interp);
 

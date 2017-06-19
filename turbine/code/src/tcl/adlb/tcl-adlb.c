@@ -520,7 +520,6 @@ static int
 ADLB_Size_Cmd(ClientData cdata, Tcl_Interp *interp,
               int objc, Tcl_Obj *const objv[])
 {
-  TCL_CONDITION(adlb_comm_init, "ADLB communicator not initialized");
   Tcl_SetObjResult(interp, Tcl_NewIntObj(10000));
   return TCL_OK;
 }
@@ -836,6 +835,12 @@ extract_create_props(Tcl_Interp *interp, bool accept_id, int argstart,
   return TCL_OK;
 }
 
+static void sig_all(void* s, void* vvar) {
+	D_Var* var = vvar;
+	for(int i=0; i < var->count; i++)
+		xtask_push(&(xtask_task_t){ NULL, NULL, var->ans[i] });
+}
+
 /**
    usage: adlb::multicreate [list of variable specs]*
    each list contains:
@@ -860,16 +865,18 @@ ADLB_Multicreate_Cmd(ClientData cdata, Tcl_Interp *interp,
   // Build list to return
   Tcl_Obj *results[count];
   for (int i = 0; i < count; i++) {
-    xtask_aftern_t* to_sig = malloc(cs.props.read_refcount*sizeof(xtask_aftern_t));
-
-    D_Var v = malloc(sizeof(D_Var));
     ADLB_create_spec cs = specs[i];
+
+    xtask_aftern_t* to_sig = malloc(cs.props.read_refcount*sizeof(xtask_aftern_t));
+    D_Var* v = malloc(sizeof(D_Var));
     *v = (D_Var){
       xtask_aftern_create(cs.props.read_refcount + cs.props.write_refcount,
-        &(xtask_task_t){ sig_all, to_sig, NULL }),
-      to_sig,
-      
+        &(xtask_task_t){ sig_all, v, NULL }),
+      cs.props.read_refcount, to_sig,
+      cs.type,
     };
+
+    results[i] = Tcl_NewPtr(v);
   }
   Tcl_SetObjResult(interp, Tcl_NewListObj(count, results));
   return TCL_OK;
@@ -3501,6 +3508,8 @@ tcl_adlb_init(Tcl_Interp* interp)
   // COMMAND("fail",      ADLB_Fail_Cmd);
   // COMMAND("abort",     ADLB_Abort_Cmd);
   COMMAND("finalize",  ADLB_Finalize_Cmd);
+
+  set_namespace_constants(interp);
 
   // Export all commands
   Tcl_Namespace *ns = Tcl_FindNamespace(interp,

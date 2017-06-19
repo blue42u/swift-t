@@ -335,6 +335,7 @@ CFLAGS += $(DEFINES) $(INCLUDES) $(HDF5_CPPFLAGS)
 LIBS :=
 LIBS += -L$(ADLB)/lib -ladlb
 LIBS += -L$(C_UTILS)/lib -lexmcutils
+LIBS += -L$(XTASK) -lxtask
 ifeq ($(filter $(TCL_LIB_DIR),$(SYSTEM_LIBS)),)
   LIBS += -L$(TCL_LIB_DIR)
   RPATH_TCL = yes
